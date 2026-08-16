@@ -10,7 +10,9 @@ import {
   NEON_SLEEPER_ART_WIDE,
   NEON_SLEEPER_ICON,
 } from './art.ts'
-import './neon-sleeper.module.css'
+import './neon-sleeper-palette.module.css'
+import './neon-sleeper-shell.module.css'
+import './neon-sleeper-integrations.module.css'
 
 const SCRIM_LIGHT = [
   'linear-gradient(90deg, rgba(231, 240, 247, 0.16) 0%, rgba(231, 240, 247, 0.06) 50%, rgba(7, 20, 46, 0.10) 100%)',
