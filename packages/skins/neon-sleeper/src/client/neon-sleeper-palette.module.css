@@ -1,0 +1,179 @@
+/* Neon Sleeper skin. Every rule is scoped under body[data-dsh-neon-sleeper].
+   The artwork is applied by apply() as a responsive embedded data URI; this
+   stylesheet remaps the shell and companion panels into clean, low-contrast
+   HUD glass with a restrained warm cabin accent. */
+
+body[data-dsh-neon-sleeper] {
+  color: #0b1a2f;
+  background-color: #d9e5ec;
+  --dsh-accent: #4daee1;
+  --dsh-scrollbar-thumb: rgba(55, 111, 151, 0.42);
+  --dsh-scrollbar-thumb-hover: rgba(55, 111, 151, 0.68);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+  color: #e8f1f7;
+  background-color: #030916;
+  --dsh-accent: #72c7f4;
+  --dsh-scrollbar-thumb: rgba(113, 199, 244, 0.30);
+  --dsh-scrollbar-thumb-hover: rgba(113, 199, 244, 0.52);
+}
+
+body[data-dsh-neon-sleeper] [id='root'] {
+  background: transparent;
+}
+
+/* Static palette: pearl gray, HUD cyan, lavender night and cabin amber. */
+body[data-dsh-neon-sleeper] {
+  --dsw-static-amber-100: #f7e9dc;
+  --dsw-static-amber-400: #e6b983;
+  --dsw-static-amber-500: #dfa66d;
+  --dsw-static-amber-600: #c98950;
+  --dsw-static-amber-900: #6b4527;
+  --dsw-static-blue-50: #f0f7fb;
+  --dsw-static-blue-50p: #e7f2f8;
+  --dsw-static-blue-75: #e0eef6;
+  --dsw-static-blue-100: #d4e8f3;
+  --dsw-static-blue-300: #a4d4eb;
+  --dsw-static-blue-400: #7cc6e8;
+  --dsw-static-blue-450: #67bae1;
+  --dsw-static-blue-500: #4daee1;
+  --dsw-static-blue-600: #3188bb;
+  --dsw-static-blue-800: #245679;
+  --dsw-static-blue-950: #0b1a2f;
+  --dsw-static-deepseek-50: #f0f7fb;
+  --dsw-static-deepseek-100: #d4e8f3;
+  --dsw-static-deepseek-200: #c1deed;
+  --dsw-static-deepseek-300: #a4d4eb;
+  --dsw-static-deepseek-400: #7cc6e8;
+  --dsw-static-deepseek-450: #67bae1;
+  --dsw-static-deepseek-500: #4daee1;
+  --dsw-static-deepseek-600: #3188bb;
+  --dsw-static-deepseek-700-delete: #2a6f9d;
+  --dsw-static-deepseek-800: #245679;
+  --dsw-static-deepseek-900: #173c59;
+  --dsw-static-green-100: #dceee8;
+  --dsw-static-green-400: #64b99d;
+  --dsw-static-green-500: #358b70;
+  --dsw-static-green-900: #1f483c;
+  --dsw-static-neutral-00: #ffffff;
+  --dsw-static-neutral-50: #f4f7f9;
+  --dsw-static-neutral-100: #e9eef2;
+  --dsw-static-neutral-150: #e1e8ed;
+  --dsw-static-neutral-200: #d8e1e7;
+  --dsw-static-neutral-250: #ccd8e0;
+  --dsw-static-neutral-300: #bac9d3;
+  --dsw-static-neutral-400: #9dafbd;
+  --dsw-static-neutral-500: #8298a9;
+  --dsw-static-neutral-550: #718899;
+  --dsw-static-neutral-600: #607889;
+  --dsw-static-neutral-700: #486274;
+  --dsw-static-neutral-800: #324a5d;
+  --dsw-static-neutral-850: #293f52;
+  --dsw-static-neutral-900: #203448;
+  --dsw-static-neutral-1000: #0b1a2f;
+  --dsw-static-neutral-bluish-00: #ffffff;
+  --dsw-static-neutral-bluish-50: #f1f6f9;
+  --dsw-static-neutral-bluish-60: #edf4f8;
+  --dsw-static-neutral-bluish-75: #e6f0f5;
+  --dsw-static-neutral-bluish-100: #dbe9f0;
+  --dsw-static-neutral-bluish-150: #d1e1ea;
+  --dsw-static-neutral-bluish-200: #c6d9e4;
+  --dsw-static-neutral-bluish-250: #b9cedb;
+  --dsw-static-neutral-bluish-300: #a7bfce;
+  --dsw-static-neutral-bluish-400: #89a8bb;
+  --dsw-static-neutral-bluish-500: #6e91a7;
+  --dsw-static-neutral-bluish-600: #537990;
+  --dsw-static-neutral-bluish-700: #3b6078;
+  --dsw-static-neutral-bluish-750: #31556d;
+  --dsw-static-neutral-bluish-800: #284960;
+  --dsw-static-neutral-bluish-850: #203d54;
+  --dsw-static-neutral-bluish-875: #19344b;
+  --dsw-static-neutral-bluish-900: #122b43;
+  --dsw-static-neutral-bluish-950: #07142e;
+  --dsw-static-neutral-bluish-1000: #030916;
+  --dsw-static-red-50: #fbeeee;
+  --dsw-static-red-100: #f7dede;
+  --dsw-static-red-400: #e97676;
+  --dsw-static-red-500: #cf5252;
+  --dsw-static-red-600: #ad3e3e;
+  --dsw-static-red-900: #5d2020;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+  --dsw-static-amber-100: #563c2a;
+  --dsw-static-amber-400: #e6b983;
+  --dsw-static-amber-500: #dfa66d;
+  --dsw-static-amber-600: #c98950;
+  --dsw-static-amber-900: #6b4527;
+  --dsw-static-blue-50: #0b203a;
+  --dsw-static-blue-50p: #0d243f;
+  --dsw-static-blue-75: #102945;
+  --dsw-static-blue-100: #132f4c;
+  --dsw-static-blue-300: #245273;
+  --dsw-static-blue-400: #326989;
+  --dsw-static-blue-450: #3f7d9d;
+  --dsw-static-blue-500: #4f93b7;
+  --dsw-static-blue-600: #72c7f4;
+  --dsw-static-blue-800: #a4d9f1;
+  --dsw-static-blue-950: #e8f4fa;
+  --dsw-static-deepseek-50: #0b203a;
+  --dsw-static-deepseek-100: #132f4c;
+  --dsw-static-deepseek-200: #193b59;
+  --dsw-static-deepseek-300: #245273;
+  --dsw-static-deepseek-400: #326989;
+  --dsw-static-deepseek-450: #3f7d9d;
+  --dsw-static-deepseek-500: #4f93b7;
+  --dsw-static-deepseek-600: #72c7f4;
+  --dsw-static-deepseek-700-delete: #87d0f3;
+  --dsw-static-deepseek-800: #a4d9f1;
+  --dsw-static-deepseek-900: #c5e7f6;
+  --dsw-static-green-100: #1f483c;
+  --dsw-static-green-400: #64b99d;
+  --dsw-static-green-500: #4ca888;
+  --dsw-static-green-900: #1f483c;
+  --dsw-static-neutral-00: #07142e;
+  --dsw-static-neutral-50: #0a1831;
+  --dsw-static-neutral-100: #0d1e38;
+  --dsw-static-neutral-150: #10243f;
+  --dsw-static-neutral-200: #142a46;
+  --dsw-static-neutral-250: #18304e;
+  --dsw-static-neutral-300: #203957;
+  --dsw-static-neutral-400: #2b4866;
+  --dsw-static-neutral-500: #385775;
+  --dsw-static-neutral-550: #42617f;
+  --dsw-static-neutral-600: #4e6d89;
+  --dsw-static-neutral-700: #66839c;
+  --dsw-static-neutral-800: #829bae;
+  --dsw-static-neutral-850: #90a8b9;
+  --dsw-static-neutral-900: #a3b8c7;
+  --dsw-static-neutral-1000: #e8f1f7;
+  --dsw-static-neutral-bluish-00: #07142e;
+  --dsw-static-neutral-bluish-50: #091831;
+  --dsw-static-neutral-bluish-60: #0a1b35;
+  --dsw-static-neutral-bluish-75: #0c203a;
+  --dsw-static-neutral-bluish-100: #0f2641;
+  --dsw-static-neutral-bluish-150: #132c48;
+  --dsw-static-neutral-bluish-200: #173250;
+  --dsw-static-neutral-bluish-250: #1c3958;
+  --dsw-static-neutral-bluish-300: #224161;
+  --dsw-static-neutral-bluish-400: #2d506f;
+  --dsw-static-neutral-bluish-500: #3a607f;
+  --dsw-static-neutral-bluish-600: #4b7390;
+  --dsw-static-neutral-bluish-700: #668aa4;
+  --dsw-static-neutral-bluish-750: #7396ae;
+  --dsw-static-neutral-bluish-800: #82a3b9;
+  --dsw-static-neutral-bluish-850: #91b0c4;
+  --dsw-static-neutral-bluish-875: #9ebbcf;
+  --dsw-static-neutral-bluish-900: #aec9d9;
+  --dsw-static-neutral-bluish-950: #c8dce8;
+  --dsw-static-neutral-bluish-1000: #e8f4fa;
+  --dsw-static-red-50: #351c24;
+  --dsw-static-red-100: #47232b;
+  --dsw-static-red-400: #e97676;
+  --dsw-static-red-500: #df6666;
+  --dsw-static-red-600: #c65353;
+  --dsw-static-red-900: #5d2020;
+}
+
+/* Semantic palette: light glass over the night cabin. */
