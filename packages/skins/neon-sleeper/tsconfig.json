@@ -1,0 +1,17 @@
+{
+  // Standalone compiler shape for this skin bundle. Builds are transpile-only;
+  // the type-only Cordis import is erased from the browser artifact.
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "noEmit": true
+  },
+  "include": ["src"]
+}

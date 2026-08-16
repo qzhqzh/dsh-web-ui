@@ -1,0 +1,289 @@
+body[data-dsh-neon-sleeper] {
+  --dsw-alias-bg-base: rgba(239, 245, 248, 0.66);
+  --dsw-alias-bg-layer-1: rgba(246, 249, 251, 0.72);
+  --dsw-alias-bg-layer-2: rgba(232, 240, 245, 0.74);
+  --dsw-alias-bg-layer-3: rgba(218, 231, 239, 0.76);
+  --dsw-alias-bg-mask-1: rgba(7, 20, 46, 0.46);
+  --dsw-alias-bg-mask-2: rgba(7, 20, 46, 0.22);
+  --dsw-alias-bg-mask-3: rgba(3, 9, 22, 0.56);
+  --dsw-alias-bg-mask-photo: rgba(3, 9, 22, 0.86);
+  --dsw-alias-bg-module-platform: rgba(232, 240, 245, 0.74);
+  --dsw-alias-bg-multi-select: rgba(196, 224, 238, 0.82);
+  --dsw-alias-bg-overlay: rgba(242, 247, 250, 0.94);
+  --dsw-alias-bg-skeleton: rgba(11, 26, 47, 0.06);
+  --dsw-alias-border-inverted2: rgba(255, 255, 255, 0.66);
+  --dsw-alias-border-inverted: rgba(255, 255, 255, 0.42);
+  --dsw-alias-border-l1: rgba(29, 77, 106, 0.14);
+  --dsw-alias-border-l2-darkmode-thin: rgba(29, 77, 106, 0.18);
+  --dsw-alias-border-l2: rgba(29, 77, 106, 0.22);
+  --dsw-alias-border-l3: rgba(29, 77, 106, 0.31);
+  --dsw-alias-border-l4: rgba(29, 77, 106, 0.42);
+  --dsw-alias-brand-primary-invert: #ffffff;
+  --dsw-alias-brand-primary-new-colorprimary-new-color: #4daee1;
+  --dsw-alias-brand-primary: #4daee1;
+  --dsw-alias-brand-text: #173c59;
+  --dsw-alias-button-contrast-fill: #173c59;
+  --dsw-alias-button-elevated-fill: rgba(255, 255, 255, 0.92);
+  --dsw-alias-button-floating-fill: rgba(255, 255, 255, 0.90);
+  --dsw-alias-button-floating-hover: rgba(231, 242, 248, 0.98);
+  --dsw-alias-button-ghost-active-border: #7cc6e8;
+  --dsw-alias-button-ghost-active-fill: rgba(160, 211, 235, 0.30);
+  --dsw-alias-button-ghost-active-hover: rgba(160, 211, 235, 0.42);
+  --dsw-alias-button-info-fill: #3188bb;
+  --dsw-alias-button-info-hover: #3d99ca;
+  --dsw-alias-button-primary-dimmed: rgba(77, 174, 225, 0.18);
+  --dsw-alias-button-primary-fill: #4daee1;
+  --dsw-alias-button-primary-hover: #67bae1;
+  --dsw-alias-button-tool-bar-fill-invisible: rgba(77, 174, 225, 0.20);
+  --dsw-alias-button-tool-bar-fill: rgba(77, 174, 225, 0.28);
+  --dsw-alias-button-tool-bar-hover: rgba(77, 174, 225, 0.38);
+  --dsw-alias-interactive-bg-active: rgba(77, 174, 225, 0.16);
+  --dsw-alias-interactive-bg-hover-accent: rgba(77, 174, 225, 0.20);
+  --dsw-alias-interactive-bg-hover-danger: rgba(207, 82, 82, 0.08);
+  --dsw-alias-interactive-bg-hover-solid: rgba(226, 239, 246, 0.96);
+  --dsw-alias-interactive-bg-hover: rgba(77, 174, 225, 0.09);
+  --dsw-alias-label-caption: #64849a;
+  --dsw-alias-label-dimmed: #9dafbd;
+  --dsw-alias-label-primary-dimmed: #31556d;
+  --dsw-alias-label-primary-foreground: #ffffff;
+  --dsw-alias-label-primary-inverted: #ffffff;
+  --dsw-alias-label-primary: #0b1a2f;
+  --dsw-alias-label-secondary: #284960;
+  --dsw-alias-label-tertiary: #537990;
+  --dsw-alias-markdown-citation: rgba(220, 234, 242, 0.72);
+  --dsw-alias-markdown-code-block-banner: rgba(242, 247, 250, 0.82);
+  --dsw-alias-markdown-code-block: rgba(242, 247, 250, 0.82);
+  --dsw-alias-markdown-code-segment-selected: rgba(255, 255, 255, 0.92);
+  --dsw-alias-markdown-code-segment-unselected: rgba(231, 240, 246, 0.76);
+  --dsw-alias-markdown-inline-code: rgba(214, 230, 239, 0.76);
+  --dsw-alias-markdown-placeholder: rgba(239, 245, 248, 0.76);
+  --dsw-alias-markdown-tag: rgba(214, 230, 239, 0.76);
+  --dsw-alias-scrollbar-bg-l1: rgba(107, 143, 165, 0.32);
+  --dsw-alias-scrollbar-bg-l2: rgba(107, 143, 165, 0.32);
+  --dsw-alias-scrollbar-hover-l1: rgba(49, 136, 187, 0.58);
+  --dsw-alias-scrollbar-hover-l2: rgba(49, 136, 187, 0.58);
+  --dsw-alias-state-business-primary: #4daee1;
+  --dsw-alias-state-business-tertiary: rgba(77, 174, 225, 0.18);
+  --dsw-alias-state-error-primary: #cf5252;
+  --dsw-alias-state-error-secondary: #e97676;
+  --dsw-alias-state-success-primary: #358b70;
+  --dsw-alias-state-success-secondary: #64b99d;
+  --dsw-alias-state-success-tertiary: #dceee8;
+  --dsw-alias-state-warn-label: #9a632f;
+  --dsw-alias-state-warn-primary: #dfa66d;
+  --dsw-alias-state-warn-secondary: #e6b983;
+  --dsw-alias-state-warn-tertiary: #f7e9dc;
+  --dsw-alias-toast-bg: #173c59;
+  --dsw-alias-tooltip-bg: rgba(246, 249, 251, 0.98);
+  --dsw-alias-tooltip-fg: #0b1a2f;
+  --dsw-specific-bubble-highlight: rgba(177, 220, 239, 0.52);
+  --dsw-specific-bubble: rgba(205, 230, 241, 0.66);
+  --dsw-specific-input-major: rgba(255, 255, 255, 0.74);
+  --dsw-specific-login-input: rgba(255, 255, 255, 0.78);
+  --dsw-specific-menu: rgba(244, 248, 250, 0.96);
+  --dsw-specific-selector: rgba(228, 240, 246, 0.92);
+  --dsw-specific-sidebar-fill: rgba(226, 235, 241, 0.68);
+  --dsw-specific-sidebar-nav-item-active-accent: rgba(103, 186, 225, 0.42);
+  --dsw-specific-sidebar-nav-item-active: rgba(190, 224, 239, 0.64);
+  --dsw-specific-sidebar-nav-item-hover: rgba(218, 236, 245, 0.72);
+  --dsw-specific-tip: rgba(246, 249, 251, 0.88);
+}
+
+/* Semantic palette: dark night-cruise glass. */
+body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+  --dsw-alias-bg-base: rgba(5, 15, 34, 0.68);
+  --dsw-alias-bg-layer-1: rgba(8, 22, 45, 0.72);
+  --dsw-alias-bg-layer-2: rgba(11, 29, 55, 0.76);
+  --dsw-alias-bg-layer-3: rgba(15, 37, 66, 0.80);
+  --dsw-alias-bg-mask-1: rgba(0, 0, 0, 0.58);
+  --dsw-alias-bg-mask-2: rgba(0, 0, 0, 0.32);
+  --dsw-alias-bg-mask-3: rgba(0, 0, 0, 0.66);
+  --dsw-alias-bg-mask-photo: rgba(2, 7, 18, 0.92);
+  --dsw-alias-bg-module-platform: rgba(11, 29, 55, 0.78);
+  --dsw-alias-bg-multi-select: rgba(28, 73, 108, 0.78);
+  --dsw-alias-bg-overlay: rgba(8, 22, 45, 0.95);
+  --dsw-alias-bg-skeleton: rgba(255, 255, 255, 0.06);
+  --dsw-alias-border-inverted2: rgba(255, 255, 255, 0.60);
+  --dsw-alias-border-inverted: rgba(255, 255, 255, 0.38);
+  --dsw-alias-border-l1: rgba(125, 202, 238, 0.12);
+  --dsw-alias-border-l2-darkmode-thin: rgba(125, 202, 238, 0.16);
+  --dsw-alias-border-l2: rgba(125, 202, 238, 0.20);
+  --dsw-alias-border-l3: rgba(125, 202, 238, 0.28);
+  --dsw-alias-border-l4: rgba(125, 202, 238, 0.38);
+  --dsw-alias-brand-primary-invert: #07142e;
+  --dsw-alias-brand-primary-new-colorprimary-new-color: #72c7f4;
+  --dsw-alias-brand-primary: #72c7f4;
+  --dsw-alias-brand-text: #c5e7f6;
+  --dsw-alias-button-contrast-fill: #173c59;
+  --dsw-alias-button-elevated-fill: rgba(15, 37, 66, 0.94);
+  --dsw-alias-button-floating-fill: rgba(8, 22, 45, 0.94);
+  --dsw-alias-button-floating-hover: rgba(20, 48, 79, 0.98);
+  --dsw-alias-button-ghost-active-border: #67bae1;
+  --dsw-alias-button-ghost-active-fill: rgba(79, 147, 183, 0.22);
+  --dsw-alias-button-ghost-active-hover: rgba(79, 147, 183, 0.32);
+  --dsw-alias-button-info-fill: #2a6f9d;
+  --dsw-alias-button-info-hover: #3188bb;
+  --dsw-alias-button-primary-dimmed: rgba(114, 199, 244, 0.18);
+  --dsw-alias-button-primary-fill: #3188bb;
+  --dsw-alias-button-primary-hover: #4daee1;
+  --dsw-alias-button-tool-bar-fill-invisible: rgba(114, 199, 244, 0.20);
+  --dsw-alias-button-tool-bar-fill: rgba(114, 199, 244, 0.28);
+  --dsw-alias-button-tool-bar-hover: rgba(114, 199, 244, 0.38);
+  --dsw-alias-interactive-bg-active: rgba(114, 199, 244, 0.18);
+  --dsw-alias-interactive-bg-hover-accent: rgba(114, 199, 244, 0.22);
+  --dsw-alias-interactive-bg-hover-danger: rgba(233, 118, 118, 0.13);
+  --dsw-alias-interactive-bg-hover-solid: rgba(20, 48, 79, 0.98);
+  --dsw-alias-interactive-bg-hover: rgba(255, 255, 255, 0.07);
+  --dsw-alias-label-caption: #7396ae;
+  --dsw-alias-label-dimmed: #4b7390;
+  --dsw-alias-label-primary-dimmed: #aec9d9;
+  --dsw-alias-label-primary-foreground: #ffffff;
+  --dsw-alias-label-primary-inverted: #07142e;
+  --dsw-alias-label-primary: #e8f1f7;
+  --dsw-alias-label-secondary: #aec9d9;
+  --dsw-alias-label-tertiary: #82a3b9;
+  --dsw-alias-markdown-citation: rgba(15, 37, 66, 0.74);
+  --dsw-alias-markdown-code-block-banner: rgba(6, 18, 39, 0.78);
+  --dsw-alias-markdown-code-block: rgba(6, 18, 39, 0.78);
+  --dsw-alias-markdown-code-segment-selected: rgba(19, 47, 79, 0.84);
+  --dsw-alias-markdown-code-segment-unselected: rgba(8, 22, 45, 0.72);
+  --dsw-alias-markdown-inline-code: rgba(10, 27, 52, 0.82);
+  --dsw-alias-markdown-placeholder: rgba(8, 22, 45, 0.72);
+  --dsw-alias-markdown-tag: rgba(10, 27, 52, 0.82);
+  --dsw-alias-scrollbar-bg-l1: rgba(56, 96, 127, 0.50);
+  --dsw-alias-scrollbar-bg-l2: rgba(56, 96, 127, 0.50);
+  --dsw-alias-scrollbar-hover-l1: rgba(114, 199, 244, 0.52);
+  --dsw-alias-scrollbar-hover-l2: rgba(114, 199, 244, 0.52);
+  --dsw-alias-state-business-primary: #72c7f4;
+  --dsw-alias-state-business-tertiary: rgba(114, 199, 244, 0.18);
+  --dsw-alias-state-error-primary: #e97676;
+  --dsw-alias-state-error-secondary: #f08b8b;
+  --dsw-alias-state-success-primary: #64b99d;
+  --dsw-alias-state-success-secondary: #78c8ad;
+  --dsw-alias-state-success-tertiary: #1f483c;
+  --dsw-alias-state-warn-label: #e6b983;
+  --dsw-alias-state-warn-primary: #dfa66d;
+  --dsw-alias-state-warn-secondary: #e6b983;
+  --dsw-alias-state-warn-tertiary: #563c2a;
+  --dsw-alias-toast-bg: rgba(15, 37, 66, 0.98);
+  --dsw-alias-tooltip-bg: rgba(230, 239, 245, 0.98);
+  --dsw-alias-tooltip-fg: #07142e;
+  --dsw-specific-bubble-highlight: rgba(41, 89, 122, 0.72);
+  --dsw-specific-bubble: rgba(25, 62, 94, 0.74);
+  --dsw-specific-input-major: rgba(8, 22, 45, 0.78);
+  --dsw-specific-login-input: rgba(8, 22, 45, 0.80);
+  --dsw-specific-menu: rgba(8, 22, 45, 0.96);
+  --dsw-specific-selector: rgba(10, 27, 52, 0.92);
+  --dsw-specific-sidebar-fill: rgba(5, 17, 38, 0.76);
+  --dsw-specific-sidebar-nav-item-active-accent: rgba(114, 199, 244, 0.28);
+  --dsw-specific-sidebar-nav-item-active: rgba(35, 79, 112, 0.64);
+  --dsw-specific-sidebar-nav-item-hover: rgba(20, 48, 79, 0.72);
+  --dsw-specific-tip: rgba(8, 22, 45, 0.90);
+}
+
+/* Clean global details. No backdrop filter is placed on the root or major shell
+   ancestors, because that would re-anchor fixed overlays. */
+body[data-dsh-neon-sleeper]::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body[data-dsh-neon-sleeper]::-webkit-scrollbar-track,
+body[data-dsh-neon-sleeper]::-webkit-scrollbar-corner {
+  background: rgba(225, 235, 241, 0.58);
+}
+
+body[data-dsh-neon-sleeper]::-webkit-scrollbar-thumb {
+  background: rgba(83, 121, 144, 0.42);
+  border: 2px solid rgba(225, 235, 241, 0.58);
+  border-radius: 999px;
+}
+
+body[data-dsh-neon-sleeper]::-webkit-scrollbar-thumb:hover {
+  background: rgba(49, 136, 187, 0.64);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::-webkit-scrollbar-track,
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::-webkit-scrollbar-corner {
+  background: rgba(3, 9, 22, 0.62);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::-webkit-scrollbar-thumb {
+  background: rgba(75, 115, 144, 0.54);
+  border-color: rgba(3, 9, 22, 0.62);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::-webkit-scrollbar-thumb:hover {
+  background: rgba(114, 199, 244, 0.52);
+}
+
+body[data-dsh-neon-sleeper]::selection {
+  color: #ffffff;
+  background: #3188bb;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::selection {
+  color: #07142e;
+  background: #72c7f4;
+}
+
+body[data-dsh-neon-sleeper] a {
+  color: #2a79aa;
+}
+
+body[data-dsh-neon-sleeper] a:visited {
+  color: #796bb2;
+}
+
+body[data-dsh-neon-sleeper] a:hover {
+  color: #173c59;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] a {
+  color: #72c7f4;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] a:visited {
+  color: #aa9ce8;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] a:hover {
+  color: #c5e7f6;
+}
+
+body[data-dsh-neon-sleeper] :focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+body[data-dsh-neon-sleeper] [role='tooltip'] {
+  color: var(--dsw-alias-tooltip-fg);
+  background: var(--dsw-alias-tooltip-bg);
+  border: 1px solid var(--dsw-alias-border-l2);
+  box-shadow: 0 8px 28px rgba(7, 20, 46, 0.22);
+}
+
+body[data-dsh-neon-sleeper] [role='dialog'] {
+  color: var(--dsw-alias-label-primary);
+  border-color: var(--dsw-alias-border-l2);
+  box-shadow: 0 24px 72px rgba(3, 9, 22, 0.30);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [role='dialog'] {
+  box-shadow: 0 28px 84px rgba(0, 0, 0, 0.52);
+}
+
+body[data-dsh-neon-sleeper] button[role='tab'],
+body[data-dsh-neon-sleeper] button[role='tab']:hover,
+body[data-dsh-neon-sleeper] button[role='tab']:active,
+body[data-dsh-neon-sleeper] button[role='tab']:disabled {
+  color: var(--dsw-alias-label-primary);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  filter: none;
+  text-shadow: none;
+  transform: none;
+}
+
+/* Companion AionUI panel tokens. */
