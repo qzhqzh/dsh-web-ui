@@ -1,5 +1,7 @@
 # @linxin666/dsh-client-ui-skin-neon-sleeper
 
+[English](README.md) | 中文
+
 Neon Sleeper「夜航舱」是为 dsh Web GUI 设计的安静未来夜行列车皮肤。它以电影感磁悬浮卧铺舱为环境背景，再将界面重映射为冷蓝 HUD、低饱和蓝紫城市光、少量暖琥珀舱内灯光与半透明玻璃表面。
 
 这套皮肤只负责呈现层，不注入服务、不发送 Cordis 事件，也不会触及模型请求。
