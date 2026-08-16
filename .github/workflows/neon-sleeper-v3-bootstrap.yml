@@ -36,12 +36,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Build and test skin
+      - name: Build skin
+        id: build
+        continue-on-error: true
         run: |
-          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
-          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+          set -o pipefail
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build 2>&1 | tee v3-build.log
 
-      - name: Generate repositories assets
+      - name: Test skin
+        id: test
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test 2>&1 | tee v3-test.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v3-diagnostics
+          path: |
+            v3-build.log
+            v3-test.log
+
+      - name: Stop on diagnostics failure
+        if: steps.build.outcome == 'failure' || steps.test.outcome == 'failure'
+        run: exit 1
+
+      - name: Generate repository assets
         run: |
           node scripts/skin-center-bundles
           pnpm --filter @linxin666/dsh-client-ui-skin-center build
