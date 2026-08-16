@@ -1,3 +1,4 @@
+# Final artifact and preview generation pass after repairing the V3 HUD segments.
 name: Neon Sleeper V3 bootstrap
 
 on:
