@@ -1,0 +1,92 @@
+name: Neon Sleeper V3 dark tuning
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v3
+
+permissions:
+  contents: write
+
+jobs:
+  tune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v3
+
+      - name: Lift dark-mode midtones
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('packages/skins/neon-sleeper/src/client/neon-sleeper-v3.module.css')
+          text = path.read_text()
+          replacements = {
+              "filter: brightness(1.08) contrast(1.02) saturate(1.10);": "filter: brightness(1.22) contrast(0.96) saturate(1.12);",
+              "linear-gradient(90deg, rgba(1, 6, 18, 0.24) 0%, rgba(1, 6, 18, 0.08) 52%, rgba(1, 6, 18, 0.05) 100%),": "linear-gradient(90deg, rgba(1, 6, 18, 0.14) 0%, rgba(1, 6, 18, 0.04) 52%, rgba(1, 6, 18, 0.025) 100%),",
+              "linear-gradient(180deg, rgba(1, 6, 18, 0.04) 0%, rgba(1, 6, 18, 0.18) 100%);": "linear-gradient(180deg, rgba(1, 6, 18, 0.015) 0%, rgba(1, 6, 18, 0.10) 100%);",
+              "filter: brightness(1.02) contrast(1.02) saturate(1.08);": "filter: brightness(1.12) contrast(0.98) saturate(1.10);",
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit('missing dark tuning marker: ' + old)
+              text = text.replace(old, new)
+          path.write_text(text)
+          PY
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build and test skin
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+
+      - name: Generate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Capture previews
+        run: node scripts/capture-previews neon-sleeper --serve
+
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm aggregate:check
+          pnpm docs:check
+
+      - name: Upload tuned previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v3-tuned-previews
+          path: packages/skins/neon-sleeper/preview
+
+      - name: Commit tuning and generated artifacts
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/neon-sleeper-v3-dark-tune.yml
+          git add -A
+          git commit -m "fix(skins): lift Neon Sleeper V3 dark midtones [skip ci]"
+          git push origin HEAD:feat/neon-sleeper-v3
