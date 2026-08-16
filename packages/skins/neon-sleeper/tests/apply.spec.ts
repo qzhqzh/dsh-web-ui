@@ -51,11 +51,17 @@ describe('neon-sleeper skin apply', () => {
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 900 })
     fiber = await mount()
     const wide = document.body.style.getPropertyValue('--neon-sleeper-art')
+    const wideHud = document.body.style.getPropertyValue('--neon-sleeper-hud-wide')
+    const leftRail = document.body.style.getPropertyValue('--neon-sleeper-hud-rail-left')
+    const rightRail = document.body.style.getPropertyValue('--neon-sleeper-hud-rail-right')
 
     document.body.dataset.dsDarkTheme = ''
     await tick()
     expect(document.body.style.getPropertyValue('background-color')).toBe('rgb(7, 21, 42)')
     expect(document.body.style.getPropertyValue('--neon-sleeper-art')).toBe(wide)
+    expect(document.body.style.getPropertyValue('--neon-sleeper-hud-wide')).toBe(wideHud)
+    expect(document.body.style.getPropertyValue('--neon-sleeper-hud-rail-left')).toBe(leftRail)
+    expect(document.body.style.getPropertyValue('--neon-sleeper-hud-rail-right')).toBe(rightRail)
 
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 600 })
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 1000 })
