@@ -32,10 +32,31 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Build and test skin
+      - name: Build skin
+        shell: bash
         run: |
-          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
-          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+          set +e
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build > /tmp/neon-build.log 2>&1
+          code=$?
+          cat /tmp/neon-build.log
+          if [ "$code" -ne 0 ]; then
+            msg=$(tail -c 3500 /tmp/neon-build.log | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')
+            echo "::error title=Neon Sleeper build failed::$msg"
+            exit "$code"
+          fi
+
+      - name: Test skin
+        shell: bash
+        run: |
+          set +e
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test > /tmp/neon-test.log 2>&1
+          code=$?
+          cat /tmp/neon-test.log
+          if [ "$code" -ne 0 ]; then
+            msg=$(tail -c 3500 /tmp/neon-test.log | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')
+            echo "::error title=Neon Sleeper tests failed::$msg"
+            exit "$code"
+          fi
 
       - name: Regenerate registries and aggregate
         run: |
