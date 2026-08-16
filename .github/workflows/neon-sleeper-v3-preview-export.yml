@@ -1,0 +1,32 @@
+name: Neon Sleeper V3 preview export
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v3
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v3
+
+      - name: Upload generated previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v3-previews
+          path: packages/skins/neon-sleeper/preview
+
+      - name: Remove one-shot workflow
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/neon-sleeper-v3-preview-export.yml
+          git commit -m "chore(skins): remove V3 preview export workflow [skip ci]"
+          git push origin HEAD:feat/neon-sleeper-v3
