@@ -10,18 +10,20 @@ import {
   NEON_SLEEPER_ART_WIDE,
   NEON_SLEEPER_ICON,
 } from './art.ts'
-import './neon-sleeper-palette.module.css'
-import './neon-sleeper-shell.module.css'
-import './neon-sleeper-integrations.module.css'
+import './neon-sleeper.module.css'
 
 const SCRIM_LIGHT = [
-  'linear-gradient(90deg, rgba(231, 240, 247, 0.16) 0%, rgba(231, 240, 247, 0.06) 50%, rgba(7, 20, 46, 0.10) 100%)',
-  'linear-gradient(180deg, rgba(7, 20, 46, 0.05) 0%, rgba(7, 20, 46, 0.18) 100%)',
+  'radial-gradient(circle at 16% 20%, rgba(113, 195, 244, 0.24) 0%, rgba(113, 195, 244, 0.10) 22%, rgba(113, 195, 244, 0) 48%)',
+  'radial-gradient(circle at 94% 10%, rgba(239, 191, 136, 0.16) 0%, rgba(239, 191, 136, 0.06) 18%, rgba(239, 191, 136, 0) 36%)',
+  'linear-gradient(90deg, rgba(226, 236, 244, 0.12) 0%, rgba(226, 236, 244, 0.04) 44%, rgba(8, 22, 45, 0.18) 100%)',
+  'linear-gradient(180deg, rgba(8, 22, 45, 0.06) 0%, rgba(8, 22, 45, 0.22) 100%)',
 ].join(', ')
 
 const SCRIM_DARK = [
-  'linear-gradient(90deg, rgba(3, 9, 22, 0.56) 0%, rgba(3, 9, 22, 0.28) 54%, rgba(3, 9, 22, 0.16) 100%)',
-  'linear-gradient(180deg, rgba(3, 9, 22, 0.18) 0%, rgba(3, 9, 22, 0.48) 100%)',
+  'radial-gradient(circle at 18% 20%, rgba(87, 171, 226, 0.18) 0%, rgba(87, 171, 226, 0.08) 20%, rgba(87, 171, 226, 0) 44%)',
+  'radial-gradient(circle at 94% 8%, rgba(230, 180, 126, 0.10) 0%, rgba(230, 180, 126, 0.04) 18%, rgba(230, 180, 126, 0) 34%)',
+  'linear-gradient(90deg, rgba(3, 9, 22, 0.58) 0%, rgba(3, 9, 22, 0.26) 54%, rgba(3, 9, 22, 0.16) 100%)',
+  'linear-gradient(180deg, rgba(3, 9, 22, 0.18) 0%, rgba(3, 9, 22, 0.54) 100%)',
 ].join(', ')
 
 const BACKDROP_PROPERTIES = [
@@ -53,7 +55,8 @@ export function apply(ctx: Context): void {
 
   const setBackdrop = (): void => {
     const dark = body.dataset.dsDarkTheme !== undefined
-    const art = usesPortraitArt() ? NEON_SLEEPER_ART_PORTRAIT : NEON_SLEEPER_ART_WIDE
+    const portrait = usesPortraitArt()
+    const art = portrait ? NEON_SLEEPER_ART_PORTRAIT : NEON_SLEEPER_ART_WIDE
     const userVeil = 'linear-gradient(rgba(3, 9, 22, var(--dsw-skin-scrim, 0)) 0%, rgba(3, 9, 22, var(--dsw-skin-scrim, 0)) 100%)'
     body.style.setProperty('background-color', dark ? '#030916' : '#d9e5ec')
     body.style.setProperty('background-image', `${userVeil}, ${dark ? SCRIM_DARK : SCRIM_LIGHT}, url(${art})`)
