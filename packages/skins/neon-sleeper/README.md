@@ -1,5 +1,7 @@
 # @linxin666/dsh-client-ui-skin-neon-sleeper
 
+English | [中文](README.zh.md)
+
 Neon Sleeper is a quiet futuristic night-train skin for the dsh web GUI. It uses a cinematic maglev sleeper-cabin scene as the ambient backdrop, then remaps the interface to cool HUD blues, muted violet city light, warm cabin highlights, and translucent glass surfaces.
 
 The skin is presentation-only. It does not inject services, emit Cordis events, or touch model requests.
