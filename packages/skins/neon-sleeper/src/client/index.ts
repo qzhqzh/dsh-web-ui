@@ -1,8 +1,7 @@
 /**
- * Neon Sleeper skin — a quiet futuristic maglev sleeper cabin overlaid by
- * restrained HUD-blue glass surfaces and a small amount of warm cabin light.
- * The plugin is presentation-only. apply() owns every DOM and inline-style
- * write it makes and retracts those writes through the Cordis effect disposer.
+ * Neon Sleeper skin — a quiet futuristic maglev sleeper cabin with separately
+ * graded light/dark presentation, real HUD artwork and restrained warm cabin
+ * light. The plugin is presentation-only and retracts every write it owns.
  */
 import type { Context } from '@deepseek-ai/cordis'
 import {
@@ -10,29 +9,25 @@ import {
   NEON_SLEEPER_ART_WIDE,
   NEON_SLEEPER_ICON,
 } from './art.ts'
+import {
+  NEON_SLEEPER_HUD_RAIL_LEFT_V3,
+  NEON_SLEEPER_HUD_RAIL_RIGHT_V3,
+  NEON_SLEEPER_HUD_WIDE_V3,
+} from './hud-v3.ts'
 import './neon-sleeper.module.css'
+import './neon-sleeper-v3.module.css'
 
-const SCRIM_LIGHT = [
-  'radial-gradient(circle at 16% 20%, rgba(113, 195, 244, 0.24) 0%, rgba(113, 195, 244, 0.10) 22%, rgba(113, 195, 244, 0) 48%)',
-  'radial-gradient(circle at 94% 10%, rgba(239, 191, 136, 0.16) 0%, rgba(239, 191, 136, 0.06) 18%, rgba(239, 191, 136, 0) 36%)',
-  'linear-gradient(90deg, rgba(226, 236, 244, 0.12) 0%, rgba(226, 236, 244, 0.04) 44%, rgba(8, 22, 45, 0.18) 100%)',
-  'linear-gradient(180deg, rgba(8, 22, 45, 0.06) 0%, rgba(8, 22, 45, 0.22) 100%)',
-].join(', ')
-
-const SCRIM_DARK = [
-  'radial-gradient(circle at 18% 20%, rgba(87, 171, 226, 0.18) 0%, rgba(87, 171, 226, 0.08) 20%, rgba(87, 171, 226, 0) 44%)',
-  'radial-gradient(circle at 94% 8%, rgba(230, 180, 126, 0.10) 0%, rgba(230, 180, 126, 0.04) 18%, rgba(230, 180, 126, 0) 34%)',
-  'linear-gradient(90deg, rgba(3, 9, 22, 0.58) 0%, rgba(3, 9, 22, 0.26) 54%, rgba(3, 9, 22, 0.16) 100%)',
-  'linear-gradient(180deg, rgba(3, 9, 22, 0.18) 0%, rgba(3, 9, 22, 0.54) 100%)',
-].join(', ')
-
-const BACKDROP_PROPERTIES = [
+const OWNED_PROPERTIES = [
   'background-color',
   'background-image',
   'background-position',
   'background-size',
   'background-attachment',
   'background-repeat',
+  '--neon-sleeper-art',
+  '--neon-sleeper-hud-wide',
+  '--neon-sleeper-hud-rail-left',
+  '--neon-sleeper-hud-rail-right',
 ] as const
 
 /** Narrow windows keep the complete portrait composition instead of cropping it. */
@@ -41,29 +36,36 @@ function usesPortraitArt(): boolean {
 }
 
 /**
- * Apply the Neon Sleeper surface: scoped body attribute, responsive embedded
- * artwork, live light/dark scrim and favicon. All state is restored on dispose.
+ * Apply the V3 surface: the art is rendered by a fixed body layer so CSS can
+ * grade light/dark modes independently, while the generated HUD studies are
+ * used directly by root pseudo-elements above the ordinary panes.
  */
 export function apply(ctx: Context): void {
   const body = document.body
   const previous = new Map<string, string>()
-  for (const property of BACKDROP_PROPERTIES) {
+  for (const property of OWNED_PROPERTIES) {
     previous.set(property, body.style.getPropertyValue(property))
   }
 
   body.dataset.dshNeonSleeper = ''
+  body.style.setProperty('--neon-sleeper-hud-wide', `url(${NEON_SLEEPER_HUD_WIDE_V3})`)
+  body.style.setProperty('--neon-sleeper-hud-rail-left', `url(${NEON_SLEEPER_HUD_RAIL_LEFT_V3})`)
+  body.style.setProperty('--neon-sleeper-hud-rail-right', `url(${NEON_SLEEPER_HUD_RAIL_RIGHT_V3})`)
+  body.style.setProperty('background-image', 'none')
+  body.style.setProperty('background-position', 'center')
+  body.style.setProperty('background-size', 'cover')
+  body.style.setProperty('background-attachment', 'fixed')
+  body.style.setProperty('background-repeat', 'no-repeat')
 
   const setBackdrop = (): void => {
     const dark = body.dataset.dsDarkTheme !== undefined
     const portrait = usesPortraitArt()
-    const art = portrait ? NEON_SLEEPER_ART_PORTRAIT : NEON_SLEEPER_ART_WIDE
-    const userVeil = 'linear-gradient(rgba(3, 9, 22, var(--dsw-skin-scrim, 0)) 0%, rgba(3, 9, 22, var(--dsw-skin-scrim, 0)) 100%)'
-    body.style.setProperty('background-color', dark ? '#030916' : '#d9e5ec')
-    body.style.setProperty('background-image', `${userVeil}, ${dark ? SCRIM_DARK : SCRIM_LIGHT}, url(${art})`)
-    body.style.setProperty('background-position', 'center')
-    body.style.setProperty('background-size', 'cover')
-    body.style.setProperty('background-attachment', 'fixed')
-    body.style.setProperty('background-repeat', 'no-repeat')
+
+    if (portrait) body.dataset.dshNeonSleeperPortrait = ''
+    else delete body.dataset.dshNeonSleeperPortrait
+
+    body.style.setProperty('--neon-sleeper-art', `url(${portrait ? NEON_SLEEPER_ART_PORTRAIT : NEON_SLEEPER_ART_WIDE})`)
+    body.style.setProperty('background-color', dark ? '#07152a' : '#d7e3eb')
   }
 
   setBackdrop()
@@ -84,11 +86,12 @@ export function apply(ctx: Context): void {
 
   ctx.effect(() => () => {
     delete body.dataset.dshNeonSleeper
+    delete body.dataset.dshNeonSleeperPortrait
     observer.disconnect()
     window.removeEventListener('resize', setBackdrop)
     for (const [property, value] of previous) {
       body.style.setProperty(property, value)
     }
     favicon.remove()
-  }, 'ui-skin-neon-sleeper: quiet maglev cabin backdrop')
+  }, 'ui-skin-neon-sleeper: layered night-cabin V3 surface')
 }
