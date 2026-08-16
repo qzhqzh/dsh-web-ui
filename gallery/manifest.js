@@ -277,6 +277,34 @@ window.SKIN_MANIFEST = {
         "dark": "packages/skins/miku/preview/dark.png"
       },
       "order": 10
+    },
+    {
+      "id": "neon-sleeper",
+      "name": "夜航舱",
+      "nameEn": "Neon Sleeper",
+      "author": "qzhqzh · dsh-web-ui 适配",
+      "tagline": "未来夜行列车 · 冷蓝 HUD 城市 · 暖光卧铺舱",
+      "description": "《夜航舱》安静科幻主题：未来磁悬浮卧铺舱与窗外不眠都市构成主背景，人物与灰猫在暖光中安睡，界面使用冷蓝 HUD、高级灰玻璃和少量琥珀光重映射 dsh token。宽屏背景将人物留在右侧、左侧保留干净工作区；窄屏自动切换完整竖幅构图。",
+      "tags": [
+        "quiet-sci-fi",
+        "maglev",
+        "cyberpunk",
+        "night",
+        "cozy",
+        "glass"
+      ],
+      "accent": "#67c5f2",
+      "bodyAttr": "data-dsh-neon-sleeper",
+      "package": "@linxin666/dsh-client-ui-skin-neon-sleeper",
+      "wiring": {
+        "id": "ui-skin-neon-sleeper",
+        "bundleWired": false
+      },
+      "preview": {
+        "light": "packages/skins/neon-sleeper/preview/light.png",
+        "dark": "packages/skins/neon-sleeper/preview/dark.png"
+      },
+      "order": 11
     }
   ]
 };

@@ -57,4 +57,6 @@ export const SKIN_CENTER_ENTRIES: readonly SkinCenterEntry[] = [
 
   {"id":"miku","name":"初音未来 · 电子歌姬","nameEn":"Hatsune Miku","author":"涂山苏苏","tagline":"蓝紫双马尾 · 01 编号 · 音符波形 · 电子歌姬主题","description":"以世界第一的虚拟歌姬初音未来为灵感的主题皮肤：蓝紫洋红渐变贯穿全局，音符与声波曲线点缀在半透明面板之间，标题栏与状态栏带有 01 编号徽标与音乐波形，半透明毛玻璃面板透出背景图——沉浸式电子歌姬氛围。","tags":["miku","vocaloid","blue","music","idol","waveform"],"accent":"#2e9bff","bodyAttr":"data-dsh-miku","package":"@linxin666/dsh-client-ui-skin-miku","order":10},
 
+  {"id":"neon-sleeper","name":"夜航舱","nameEn":"Neon Sleeper","author":"qzhqzh · dsh-web-ui 适配","tagline":"未来夜行列车 · 冷蓝 HUD 城市 · 暖光卧铺舱","description":"《夜航舱》安静科幻主题：未来磁悬浮卧铺舱与窗外不眠都市构成主背景，人物与灰猫在暖光中安睡，界面使用冷蓝 HUD、高级灰玻璃和少量琥珀光重映射 dsh token。宽屏背景将人物留在右侧、左侧保留干净工作区；窄屏自动切换完整竖幅构图。","tags":["quiet-sci-fi","maglev","cyberpunk","night","cozy","glass"],"accent":"#67c5f2","bodyAttr":"data-dsh-neon-sleeper","package":"@linxin666/dsh-client-ui-skin-neon-sleeper","order":11},
+
 ]
