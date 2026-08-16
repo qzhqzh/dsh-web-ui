@@ -71,7 +71,7 @@ body[data-dsh-neon-sleeper]::before {
 }
 
 body[data-dsh-neon-sleeper][data-ds-dark-theme]::before {
-  filter: brightness(1.08) contrast(1.02) saturate(1.10);
+  filter: brightness(1.22) contrast(0.96) saturate(1.12);
 }
 
 /* Scrim is deliberately subtle. Opaque responsibility is moved to the sidebar,
@@ -98,8 +98,8 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme]::after {
   background:
     linear-gradient(rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 0%, rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 100%),
     radial-gradient(circle at 92% 10%, rgba(231, 181, 127, 0.09) 0%, rgba(231, 181, 127, 0.03) 20%, transparent 38%),
-    linear-gradient(90deg, rgba(1, 6, 18, 0.24) 0%, rgba(1, 6, 18, 0.08) 52%, rgba(1, 6, 18, 0.05) 100%),
-    linear-gradient(180deg, rgba(1, 6, 18, 0.04) 0%, rgba(1, 6, 18, 0.18) 100%);
+    linear-gradient(90deg, rgba(1, 6, 18, 0.14) 0%, rgba(1, 6, 18, 0.04) 52%, rgba(1, 6, 18, 0.025) 100%),
+    linear-gradient(180deg, rgba(1, 6, 18, 0.015) 0%, rgba(1, 6, 18, 0.10) 100%);
 }
 
 body[data-dsh-neon-sleeper] [id='root'] {
@@ -193,7 +193,7 @@ body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait]::before {
 }
 
 body[data-dsh-neon-sleeper][data-ds-dark-theme][data-dsh-neon-sleeper-portrait]::before {
-  filter: brightness(1.02) contrast(1.02) saturate(1.08);
+  filter: brightness(1.12) contrast(0.98) saturate(1.10);
 }
 
 body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait] [id='root']::before {
