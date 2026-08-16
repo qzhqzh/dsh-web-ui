@@ -1,0 +1,199 @@
+body[data-dsh-neon-sleeper] {
+  --aion-bg-base: rgba(241, 246, 249, 0.72);
+  --aion-bg-1: rgba(246, 249, 251, 0.70);
+  --aion-bg-2: rgba(229, 239, 245, 0.76);
+  --aion-bg-3: rgba(77, 174, 225, 0.20);
+  --aion-bg-4: rgba(77, 174, 225, 0.30);
+  --aion-bg-hover: rgba(77, 174, 225, 0.09);
+  --aion-bg-active: rgba(77, 174, 225, 0.16);
+  --aion-text-primary: #0b1a2f;
+  --aion-text-secondary: #284960;
+  --aion-text-tertiary: #537990;
+  --aion-text-disabled: #9dafbd;
+  --aion-primary: #4daee1;
+  --aion-success: #358b70;
+  --aion-warning: #dfa66d;
+  --aion-danger: #cf5252;
+  --aion-brand: #7cc6e8;
+  --aion-aou-1: #f0f7fb;
+  --aion-aou-2: #d9edf6;
+  --aion-aou-3: #a4d4eb;
+  --aion-aou-4: #67bae1;
+  --aion-aou-5: #4daee1;
+  --aion-aou-6: #245679;
+  --aion-fill-2: rgba(77, 174, 225, 0.07);
+  --aion-fill-3: rgba(77, 174, 225, 0.15);
+  --aion-border-base: rgba(29, 77, 106, 0.20);
+  --aion-overlay-shadow: 0 12px 40px rgba(7, 20, 46, 0.28);
+  --aion-font-sans: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --aion-font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+  --aion-bg-base: rgba(5, 15, 34, 0.80);
+  --aion-bg-1: rgba(8, 22, 45, 0.72);
+  --aion-bg-2: rgba(11, 29, 55, 0.78);
+  --aion-bg-3: rgba(114, 199, 244, 0.18);
+  --aion-bg-4: rgba(114, 199, 244, 0.28);
+  --aion-bg-hover: rgba(114, 199, 244, 0.11);
+  --aion-bg-active: rgba(114, 199, 244, 0.18);
+  --aion-text-primary: #e8f1f7;
+  --aion-text-secondary: #aec9d9;
+  --aion-text-tertiary: #82a3b9;
+  --aion-text-disabled: #4b7390;
+  --aion-primary: #72c7f4;
+  --aion-success: #64b99d;
+  --aion-warning: #dfa66d;
+  --aion-danger: #e97676;
+  --aion-brand: #72c7f4;
+  --aion-aou-1: #0b203a;
+  --aion-aou-2: #132f4c;
+  --aion-aou-3: #193b59;
+  --aion-aou-4: #2a6f9d;
+  --aion-aou-5: #4f93b7;
+  --aion-aou-6: #87d0f3;
+  --aion-fill-2: rgba(114, 199, 244, 0.11);
+  --aion-fill-3: rgba(114, 199, 244, 0.19);
+  --aion-border-base: rgba(125, 202, 238, 0.18);
+  --aion-overlay-shadow: 0 16px 48px rgba(0, 0, 0, 0.52);
+}
+
+body[data-dsh-neon-sleeper] [data-aionui-explorer-col],
+body[data-dsh-neon-sleeper] [data-aionui-preview-col],
+body[data-dsh-neon-sleeper] :global(.aionui-root) {
+  -webkit-backdrop-filter: blur(14px) saturate(1.05);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
+body[data-dsh-neon-sleeper] :global(.aionui-dialog),
+body[data-dsh-neon-sleeper] :global(.aionui-menu),
+body[data-dsh-neon-sleeper] :global(.aionui-toast) {
+  -webkit-backdrop-filter: blur(16px) saturate(1.04);
+  backdrop-filter: blur(16px) saturate(1.04);
+}
+
+body[data-dsh-neon-sleeper] :global(.aionui-overlay) {
+  background: rgba(7, 20, 46, 0.42);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] :global(.aionui-overlay) {
+  background: rgba(0, 0, 0, 0.58);
+}
+
+body[data-dsh-neon-sleeper] :global(.aionui-explorer-handle),
+body[data-dsh-neon-sleeper] :global(.aionui-preview-handle) {
+  background: rgba(103, 145, 169, 0.36);
+}
+
+body[data-dsh-neon-sleeper] :global(.aionui-explorer-handle):hover,
+body[data-dsh-neon-sleeper] :global(.aionui-preview-handle):hover {
+  background: rgba(77, 174, 225, 0.72);
+  box-shadow: 0 0 10px rgba(77, 174, 225, 0.34);
+}
+
+/* Git graph uses a restrained HUD lane palette. */
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='node']:nth-child(6n+1),
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='merge']:nth-child(6n+1) { color: #4daee1; }
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='node']:nth-child(6n+2),
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='merge']:nth-child(6n+2) { color: #64b99d; }
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='node']:nth-child(6n+3),
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='merge']:nth-child(6n+3) { color: #dfa66d; }
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='node']:nth-child(6n+4),
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='merge']:nth-child(6n+4) { color: #9d8fe1; }
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='node']:nth-child(6n+5),
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='merge']:nth-child(6n+5) { color: #3188bb; }
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='node']:nth-child(6n),
+body[data-dsh-neon-sleeper] [data-gitgraph-lanes] > [data-gitgraph-glyph='merge']:nth-child(6n) { color: #7cc6e8; }
+
+body[data-dsh-neon-sleeper] [data-gitgraph-dialog] {
+  -webkit-backdrop-filter: blur(16px) saturate(1.04);
+  backdrop-filter: blur(16px) saturate(1.04);
+  border-color: rgba(103, 186, 225, 0.34);
+}
+
+body[data-dsh-neon-sleeper] [data-gitgraph-ref]:not([data-gitgraph-ref-current]) {
+  background: rgba(77, 174, 225, 0.12);
+  border: 1px solid rgba(49, 136, 187, 0.24);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [data-gitgraph-ref]:not([data-gitgraph-ref-current]) {
+  background: rgba(114, 199, 244, 0.13);
+  border-color: rgba(114, 199, 244, 0.20);
+}
+
+/* Workspace and branch selectors stay crisp instead of becoming opaque cyan. */
+body[data-dsh-neon-sleeper] div:has(> div > [data-gitgraph-chip]) {
+  --dsw-alias-button-tool-bar-fill: rgba(77, 174, 225, 0.08);
+  --dsw-alias-border-l2: rgba(49, 136, 187, 0.34);
+  --dsw-alias-label-secondary: #284960;
+  --dsw-alias-interactive-bg-hover: rgba(77, 174, 225, 0.14);
+  --dsw-alias-interactive-bg-active: rgba(77, 174, 225, 0.20);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] div:has(> div > [data-gitgraph-chip]) {
+  --dsw-alias-button-tool-bar-fill: rgba(114, 199, 244, 0.08);
+  --dsw-alias-border-l2: rgba(114, 199, 244, 0.30);
+  --dsw-alias-label-secondary: #d7e8f1;
+  --dsw-alias-interactive-bg-hover: rgba(114, 199, 244, 0.14);
+  --dsw-alias-interactive-bg-active: rgba(114, 199, 244, 0.21);
+}
+
+/* Composer fade hides scrolled text without turning the entire input seat into
+   a containing block for fixed dialogs. */
+body[data-dsh-neon-sleeper] [data-phase='active'] [class*='composerSeat'] {
+  background: transparent !important;
+}
+
+body[data-dsh-neon-sleeper] [data-phase='active'] [class*='composerSeat']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0, var(--dsw-alias-bg-base) 36px);
+  -webkit-backdrop-filter: blur(12px) saturate(1.03);
+  backdrop-filter: blur(12px) saturate(1.03);
+}
+
+body[data-dsh-neon-sleeper] button,
+body[data-dsh-neon-sleeper] a,
+body[data-dsh-neon-sleeper] :global(.aionui-btn),
+body[data-dsh-neon-sleeper] :global(.aionui-menu-item),
+body[data-dsh-neon-sleeper] :global(.aionui-explorer-handle),
+body[data-dsh-neon-sleeper] :global(.aionui-preview-handle) {
+  transition: background-color 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, color 0.14s ease, opacity 0.14s ease;
+}
+
+body[data-dsh-neon-sleeper] button:disabled,
+body[data-dsh-neon-sleeper] :global(.aionui-btn:disabled),
+body[data-dsh-neon-sleeper] :global(.aionui-menu-item-disabled) {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+/* Narrow windows place more opacity behind text while the full portrait art is
+   visible beneath the interface. */
+@media (max-aspect-ratio: 4 / 5) {
+  body[data-dsh-neon-sleeper] {
+    --dsw-alias-bg-base: rgba(239, 245, 248, 0.78);
+    --dsw-specific-sidebar-fill: rgba(226, 235, 241, 0.78);
+    --dsw-specific-input-major: rgba(255, 255, 255, 0.82);
+  }
+
+  body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+    --dsw-alias-bg-base: rgba(5, 15, 34, 0.80);
+    --dsw-specific-sidebar-fill: rgba(5, 17, 38, 0.84);
+    --dsw-specific-input-major: rgba(8, 22, 45, 0.86);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-dsh-neon-sleeper] button,
+  body[data-dsh-neon-sleeper] a,
+  body[data-dsh-neon-sleeper] :global(.aionui-btn),
+  body[data-dsh-neon-sleeper] :global(.aionui-menu-item),
+  body[data-dsh-neon-sleeper] :global(.aionui-explorer-handle),
+  body[data-dsh-neon-sleeper] :global(.aionui-preview-handle) {
+    transition: none;
+  }
+}
