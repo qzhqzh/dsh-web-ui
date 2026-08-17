@@ -1,68 +1,69 @@
-/* Neon Sleeper V4 — photography first, minimal UI treatment. */
+/* Neon Sleeper V5 — HD photography, transparent shell, no global frosted veil. */
 
 body[data-dsh-neon-sleeper] {
   position: relative;
   isolation: isolate;
-  color: #0d2539;
+  color: #10283c;
   background-color: #dce9f1;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: Inter, Geist, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 
   --dsh-accent: #238bb8;
-  --dsw-alias-bg-base: rgba(229, 241, 248, 0.08);
-  --dsw-alias-bg-layer-1: rgba(239, 247, 251, 0.14);
-  --dsw-alias-bg-layer-2: rgba(229, 241, 248, 0.21);
-  --dsw-alias-bg-layer-3: rgba(219, 235, 244, 0.30);
-  --dsw-alias-bg-module-platform: rgba(232, 243, 249, 0.15);
-  --dsw-alias-bg-overlay: rgba(245, 250, 252, 0.94);
-  --dsw-alias-bg-multi-select: rgba(190, 224, 240, 0.58);
-  --dsw-alias-border-l1: rgba(37, 98, 134, 0.12);
-  --dsw-alias-border-l2: rgba(37, 98, 134, 0.20);
-  --dsw-alias-border-l3: rgba(37, 98, 134, 0.30);
-  --dsw-alias-border-l4: rgba(37, 98, 134, 0.42);
+  --dsw-alias-bg-base: rgba(231, 242, 248, 0.04);
+  --dsw-alias-bg-layer-1: rgba(241, 248, 252, 0.09);
+  --dsw-alias-bg-layer-2: rgba(232, 243, 249, 0.15);
+  --dsw-alias-bg-layer-3: rgba(223, 238, 247, 0.22);
+  --dsw-alias-bg-module-platform: rgba(238, 247, 251, 0.10);
+  --dsw-alias-bg-overlay: rgba(247, 251, 253, 0.95);
+  --dsw-alias-bg-multi-select: rgba(178, 220, 240, 0.54);
+  --dsw-alias-border-l1: rgba(31, 90, 126, 0.10);
+  --dsw-alias-border-l2: rgba(31, 90, 126, 0.17);
+  --dsw-alias-border-l3: rgba(31, 90, 126, 0.26);
+  --dsw-alias-border-l4: rgba(31, 90, 126, 0.38);
   --dsw-alias-brand-primary: #238bb8;
-  --dsw-alias-brand-text: #174b68;
-  --dsw-alias-label-primary: #0d2539;
-  --dsw-alias-label-secondary: #365a70;
-  --dsw-alias-label-tertiary: #617d8f;
-  --dsw-alias-label-caption: #4e7186;
-  --dsw-alias-label-primary-dimmed: #496b7f;
+  --dsw-alias-brand-text: #15506e;
+  --dsw-alias-label-primary: #10283c;
+  --dsw-alias-label-secondary: #355d73;
+  --dsw-alias-label-tertiary: #648397;
+  --dsw-alias-label-caption: #587a8e;
+  --dsw-alias-label-primary-dimmed: #4c6f83;
   --dsw-alias-interactive-bg-hover: rgba(35, 139, 184, 0.08);
-  --dsw-alias-interactive-bg-hover-accent: rgba(35, 139, 184, 0.14);
+  --dsw-alias-interactive-bg-hover-accent: rgba(35, 139, 184, 0.13);
   --dsw-alias-interactive-bg-active: rgba(35, 139, 184, 0.16);
   --dsw-alias-button-primary-fill: #238bb8;
   --dsw-alias-button-primary-hover: #329bc5;
-  --dsw-alias-button-elevated-fill: rgba(249, 252, 254, 0.82);
-  --dsw-alias-button-floating-fill: rgba(249, 252, 254, 0.84);
-  --dsw-alias-state-business-primary: #238bb8;
-  --dsw-alias-state-error-primary: #b54855;
-  --dsw-alias-state-error-secondary: #ca5c68;
+  --dsw-alias-button-elevated-fill: rgba(251, 253, 254, 0.88);
+  --dsw-alias-button-floating-fill: rgba(251, 253, 254, 0.90);
+  --dsw-alias-state-business-primary: #1f82ad;
+  --dsw-alias-state-error-primary: #b84c59;
+  --dsw-alias-state-error-secondary: #ca6570;
   --dsw-alias-state-success-primary: #347d6c;
   --dsw-alias-state-warn-primary: #9b6c36;
-  --dsw-specific-sidebar-fill: rgba(232, 241, 247, 0.84);
-  --dsw-specific-sidebar-nav-item-active: rgba(132, 198, 229, 0.28);
-  --dsw-specific-sidebar-nav-item-hover: rgba(132, 198, 229, 0.18);
-  --dsw-specific-sidebar-nav-item-active-accent: rgba(35, 139, 184, 0.30);
-  --dsw-specific-input-major: rgba(249, 252, 254, 0.78);
-  --dsw-specific-login-input: rgba(249, 252, 254, 0.88);
-  --dsw-specific-menu: rgba(247, 251, 253, 0.96);
-  --dsw-specific-selector: rgba(244, 249, 252, 0.92);
-  --dsw-specific-bubble: rgba(226, 240, 247, 0.66);
-  --dsw-specific-bubble-highlight: rgba(203, 230, 242, 0.72);
 
-  --aion-bg-base: rgba(230, 241, 247, 0.16);
-  --aion-bg-1: rgba(241, 248, 251, 0.22);
-  --aion-bg-2: rgba(228, 240, 247, 0.30);
-  --aion-bg-3: rgba(35, 139, 184, 0.12);
-  --aion-bg-4: rgba(35, 139, 184, 0.20);
+  --dsw-specific-sidebar-fill: rgba(232, 243, 249, 0.80);
+  --dsw-specific-sidebar-nav-item-active: rgba(104, 188, 226, 0.25);
+  --dsw-specific-sidebar-nav-item-hover: rgba(104, 188, 226, 0.14);
+  --dsw-specific-sidebar-nav-item-active-accent: rgba(35, 139, 184, 0.28);
+  --dsw-specific-input-major: rgba(249, 252, 254, 0.76);
+  --dsw-specific-login-input: rgba(250, 253, 254, 0.88);
+  --dsw-specific-menu: rgba(248, 252, 254, 0.97);
+  --dsw-specific-selector: rgba(246, 250, 253, 0.94);
+  --dsw-specific-bubble: rgba(227, 241, 248, 0.62);
+  --dsw-specific-bubble-highlight: rgba(204, 230, 242, 0.70);
+
+  --aion-bg-base: rgba(232, 243, 249, 0.08);
+  --aion-bg-1: rgba(243, 249, 252, 0.13);
+  --aion-bg-2: rgba(231, 242, 248, 0.20);
+  --aion-bg-3: rgba(35, 139, 184, 0.10);
+  --aion-bg-4: rgba(35, 139, 184, 0.17);
   --aion-bg-hover: rgba(35, 139, 184, 0.08);
-  --aion-bg-active: rgba(35, 139, 184, 0.14);
-  --aion-text-primary: #0d2539;
-  --aion-text-secondary: #365a70;
-  --aion-text-tertiary: #617d8f;
+  --aion-bg-active: rgba(35, 139, 184, 0.13);
+  --aion-text-primary: #10283c;
+  --aion-text-secondary: #355d73;
+  --aion-text-tertiary: #648397;
   --aion-primary: #238bb8;
-  --aion-border-base: rgba(37, 98, 134, 0.18);
+  --aion-border-base: rgba(31, 90, 126, 0.16);
 }
 
 body[data-dsh-neon-sleeper][data-ds-dark-theme] {
@@ -70,110 +71,108 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme] {
   background-color: #061426;
 
   --dsh-accent: #80d1f5;
-  --dsw-alias-bg-base: rgba(3, 13, 29, 0.07);
-  --dsw-alias-bg-layer-1: rgba(5, 19, 40, 0.14);
-  --dsw-alias-bg-layer-2: rgba(7, 25, 50, 0.22);
-  --dsw-alias-bg-layer-3: rgba(10, 33, 62, 0.32);
-  --dsw-alias-bg-module-platform: rgba(5, 19, 40, 0.16);
-  --dsw-alias-bg-overlay: rgba(7, 24, 48, 0.94);
-  --dsw-alias-bg-multi-select: rgba(39, 93, 126, 0.60);
-  --dsw-alias-border-l1: rgba(128, 209, 245, 0.10);
-  --dsw-alias-border-l2: rgba(128, 209, 245, 0.18);
-  --dsw-alias-border-l3: rgba(128, 209, 245, 0.28);
-  --dsw-alias-border-l4: rgba(128, 209, 245, 0.40);
+  --dsw-alias-bg-base: rgba(3, 13, 29, 0.04);
+  --dsw-alias-bg-layer-1: rgba(5, 19, 40, 0.09);
+  --dsw-alias-bg-layer-2: rgba(7, 25, 50, 0.16);
+  --dsw-alias-bg-layer-3: rgba(10, 33, 62, 0.23);
+  --dsw-alias-bg-module-platform: rgba(5, 19, 40, 0.10);
+  --dsw-alias-bg-overlay: rgba(7, 24, 48, 0.96);
+  --dsw-alias-bg-multi-select: rgba(39, 93, 126, 0.56);
+  --dsw-alias-border-l1: rgba(128, 209, 245, 0.09);
+  --dsw-alias-border-l2: rgba(128, 209, 245, 0.16);
+  --dsw-alias-border-l3: rgba(128, 209, 245, 0.25);
+  --dsw-alias-border-l4: rgba(128, 209, 245, 0.38);
   --dsw-alias-brand-primary: #80d1f5;
   --dsw-alias-brand-text: #d7f1fc;
-  --dsw-alias-label-primary: #eff8fd;
-  --dsw-alias-label-secondary: #c8dce8;
-  --dsw-alias-label-tertiary: #90afc1;
-  --dsw-alias-label-caption: #9cb9ca;
-  --dsw-alias-label-primary-dimmed: #b1c9d6;
+  --dsw-alias-label-primary: #f1f9fd;
+  --dsw-alias-label-secondary: #cadde8;
+  --dsw-alias-label-tertiary: #95b3c3;
+  --dsw-alias-label-caption: #a2bdcc;
+  --dsw-alias-label-primary-dimmed: #b6ccd8;
   --dsw-alias-interactive-bg-hover: rgba(128, 209, 245, 0.08);
-  --dsw-alias-interactive-bg-hover-accent: rgba(128, 209, 245, 0.14);
-  --dsw-alias-interactive-bg-active: rgba(128, 209, 245, 0.17);
+  --dsw-alias-interactive-bg-hover-accent: rgba(128, 209, 245, 0.13);
+  --dsw-alias-interactive-bg-active: rgba(128, 209, 245, 0.16);
   --dsw-alias-button-primary-fill: #3c9dc9;
   --dsw-alias-button-primary-hover: #51afd7;
-  --dsw-alias-button-elevated-fill: rgba(9, 31, 57, 0.82);
-  --dsw-alias-button-floating-fill: rgba(9, 31, 57, 0.84);
+  --dsw-alias-button-elevated-fill: rgba(8, 29, 54, 0.84);
+  --dsw-alias-button-floating-fill: rgba(8, 29, 54, 0.86);
   --dsw-alias-state-business-primary: #80d1f5;
-  --dsw-alias-state-error-primary: #ff8f98;
+  --dsw-alias-state-error-primary: #ff929b;
   --dsw-alias-state-error-secondary: #ffadb4;
   --dsw-alias-state-success-primary: #7cc8af;
   --dsw-alias-state-warn-primary: #efc78e;
-  --dsw-specific-sidebar-fill: rgba(4, 17, 37, 0.78);
-  --dsw-specific-sidebar-nav-item-active: rgba(47, 108, 145, 0.48);
-  --dsw-specific-sidebar-nav-item-hover: rgba(47, 108, 145, 0.30);
-  --dsw-specific-sidebar-nav-item-active-accent: rgba(128, 209, 245, 0.26);
-  --dsw-specific-input-major: rgba(4, 20, 43, 0.65);
-  --dsw-specific-login-input: rgba(4, 20, 43, 0.82);
-  --dsw-specific-menu: rgba(5, 20, 43, 0.96);
-  --dsw-specific-selector: rgba(7, 25, 50, 0.92);
-  --dsw-specific-bubble: rgba(18, 55, 88, 0.62);
-  --dsw-specific-bubble-highlight: rgba(35, 79, 112, 0.70);
 
-  --aion-bg-base: rgba(3, 15, 34, 0.18);
-  --aion-bg-1: rgba(5, 20, 43, 0.24);
-  --aion-bg-2: rgba(7, 25, 51, 0.32);
-  --aion-bg-3: rgba(128, 209, 245, 0.12);
-  --aion-bg-4: rgba(128, 209, 245, 0.20);
+  --dsw-specific-sidebar-fill: rgba(4, 17, 37, 0.82);
+  --dsw-specific-sidebar-nav-item-active: rgba(47, 108, 145, 0.46);
+  --dsw-specific-sidebar-nav-item-hover: rgba(47, 108, 145, 0.27);
+  --dsw-specific-sidebar-nav-item-active-accent: rgba(128, 209, 245, 0.24);
+  --dsw-specific-input-major: rgba(4, 20, 43, 0.68);
+  --dsw-specific-login-input: rgba(4, 20, 43, 0.84);
+  --dsw-specific-menu: rgba(5, 20, 43, 0.97);
+  --dsw-specific-selector: rgba(7, 25, 50, 0.94);
+  --dsw-specific-bubble: rgba(18, 55, 88, 0.60);
+  --dsw-specific-bubble-highlight: rgba(35, 79, 112, 0.68);
+
+  --aion-bg-base: rgba(3, 15, 34, 0.09);
+  --aion-bg-1: rgba(5, 20, 43, 0.14);
+  --aion-bg-2: rgba(7, 25, 51, 0.21);
+  --aion-bg-3: rgba(128, 209, 245, 0.10);
+  --aion-bg-4: rgba(128, 209, 245, 0.17);
   --aion-bg-hover: rgba(128, 209, 245, 0.08);
-  --aion-bg-active: rgba(128, 209, 245, 0.14);
-  --aion-text-primary: #eff8fd;
-  --aion-text-secondary: #c8dce8;
-  --aion-text-tertiary: #90afc1;
+  --aion-bg-active: rgba(128, 209, 245, 0.13);
+  --aion-text-primary: #f1f9fd;
+  --aion-text-secondary: #cadde8;
+  --aion-text-tertiary: #95b3c3;
   --aion-primary: #80d1f5;
-  --aion-border-base: rgba(128, 209, 245, 0.16);
+  --aion-border-base: rgba(128, 209, 245, 0.15);
 }
 
-/* The photograph is the main surface. It is intentionally rendered at full opacity. */
+/* Full-resolution photograph. No blur, no opacity wash, no global scrim. */
 body[data-dsh-neon-sleeper]::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  opacity: 1;
   background-image: var(--neon-sleeper-art);
   background-position: right center;
   background-size: cover;
   background-repeat: no-repeat;
+  image-rendering: auto;
 }
 
 body[data-dsh-neon-sleeper][data-ds-dark-theme]::before {
-  filter: brightness(0.88) contrast(1.05) saturate(1.05);
+  filter: brightness(0.72) contrast(1.08) saturate(0.96);
 }
 
-/* Sparse distant sky details occupy only the quiet upper-left negative space. */
-body[data-dsh-neon-sleeper]::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 11% 10%, rgba(240, 250, 255, 0.72) 0 0.7px, transparent 1.5px),
-    radial-gradient(circle at 17% 18%, rgba(205, 235, 252, 0.56) 0 0.7px, transparent 1.5px),
-    radial-gradient(circle at 23% 8%, rgba(232, 242, 255, 0.62) 0 0.8px, transparent 1.6px),
-    radial-gradient(circle at 29% 22%, rgba(166, 216, 245, 0.46) 0 0.7px, transparent 1.5px),
-    radial-gradient(circle at 34% 13%, rgba(211, 197, 245, 0.42) 0 0.8px, transparent 1.7px),
-    linear-gradient(104deg, transparent 0 23%, rgba(133, 205, 239, 0.20) 23.08% 23.13%, transparent 23.20% 100%),
-    linear-gradient(104deg, transparent 0 34%, rgba(167, 214, 239, 0.14) 34.08% 34.12%, transparent 34.19% 100%);
-}
-
-body[data-dsh-neon-sleeper][data-ds-dark-theme]::after {
-  background:
-    radial-gradient(circle at 11% 10%, rgba(224, 247, 255, 0.82) 0 0.7px, transparent 1.5px),
-    radial-gradient(circle at 17% 18%, rgba(156, 220, 251, 0.64) 0 0.7px, transparent 1.5px),
-    radial-gradient(circle at 23% 8%, rgba(210, 238, 255, 0.72) 0 0.8px, transparent 1.6px),
-    radial-gradient(circle at 29% 22%, rgba(111, 194, 238, 0.54) 0 0.7px, transparent 1.5px),
-    radial-gradient(circle at 34% 13%, rgba(194, 170, 238, 0.50) 0 0.8px, transparent 1.7px),
-    linear-gradient(104deg, transparent 0 23%, rgba(90, 184, 232, 0.24) 23.08% 23.13%, transparent 23.20% 100%),
-    linear-gradient(104deg, transparent 0 34%, rgba(120, 184, 222, 0.18) 34.08% 34.12%, transparent 34.19% 100%);
-}
-
+/* The application shell stays transparent; readable surfaces are local to controls. */
 body[data-dsh-neon-sleeper] [id='root'] {
   position: relative;
   z-index: 1;
   background: transparent;
+}
+
+/* Left navigation follows the reference: luminous blue-white glass, but no blur. */
+body[data-dsh-neon-sleeper] [role='navigation'] {
+  background:
+    linear-gradient(180deg, rgba(244, 250, 253, 0.91), rgba(222, 239, 247, 0.84)) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.56);
+  box-shadow: 12px 0 34px rgba(12, 49, 74, 0.09);
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [role='navigation'] {
+  background:
+    linear-gradient(180deg, rgba(5, 21, 44, 0.88), rgba(4, 16, 35, 0.82)) !important;
+  border-right-color: rgba(128, 209, 245, 0.12);
+  box-shadow: 12px 0 36px rgba(0, 5, 15, 0.30);
+}
+
+body[data-dsh-neon-sleeper] [role='navigation'] button,
+body[data-dsh-neon-sleeper] [role='navigation'] [role='button'] {
+  border-radius: 10px;
 }
 
 /* The composer layout seat never paints a second rectangle behind the real input. */
@@ -182,6 +181,8 @@ body[data-dsh-neon-sleeper] [data-composer-seat] {
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 body[data-dsh-neon-sleeper] [class*='composerSeat']::before,
@@ -190,6 +191,7 @@ body[data-dsh-neon-sleeper] [data-composer-seat]::before,
 body[data-dsh-neon-sleeper] [data-composer-seat]::after {
   background: transparent !important;
   box-shadow: none !important;
+  content: none !important;
 }
 
 body[data-dsh-neon-sleeper] [data-composer],
@@ -222,16 +224,16 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme]::selection {
 
 @media (max-aspect-ratio: 4 / 5) {
   body[data-dsh-neon-sleeper]::before {
-    background-position: center;
+    background-position: 72% center;
   }
 
   body[data-dsh-neon-sleeper] {
-    --dsw-specific-sidebar-fill: rgba(232, 241, 247, 0.90);
+    --dsw-specific-sidebar-fill: rgba(232, 243, 249, 0.90);
     --dsw-specific-input-major: rgba(249, 252, 254, 0.84);
   }
 
   body[data-dsh-neon-sleeper][data-ds-dark-theme] {
-    --dsw-specific-sidebar-fill: rgba(4, 17, 37, 0.88);
+    --dsw-specific-sidebar-fill: rgba(4, 17, 37, 0.89);
     --dsw-specific-input-major: rgba(4, 20, 43, 0.76);
   }
 }

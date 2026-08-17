@@ -6,14 +6,15 @@ Neon Sleeper is a photography-first skin for the DSH Web UI. It turns the worksp
 
 ## Design direction
 
-The V4 rebuild intentionally removes the accumulated V3 visual stack. The photograph remains the primary surface, while the interface stays readable through translucent color tokens rather than broad frosted effects.
+V5 makes image fidelity a functional requirement. The wide desktop artwork now comes from the original cabin image rather than the old 864×540 intermediate WebP, and is packaged as a 3172×1984 high-quality WebP. The UI no longer relies on a full-screen frosted veil: readability is handled by local translucent controls and a clearer sidebar surface.
 
-- Clear photographic background with no global blur.
-- No shell-level backdrop filter or large milky veil.
-- Sparse stars and distant traffic streaks only in the quiet upper-left area.
-- High-contrast light and dark text palettes.
+- 3172×1984 HD wide artwork sourced from the original cabin image.
+- High-quality WebP compression rather than repeated low-resolution re-encoding.
+- No global blur, shell-level backdrop blur or full-screen milky scrim.
+- Light sidebar uses a luminous blue-white translucent surface with clearer grouping.
+- Dark sidebar uses a restrained deep-blue translucent surface with strong text contrast.
 - Transparent composer layout wrappers so only the real input surface is visible.
-- Responsive wide and portrait artwork embedded in the package with no runtime image request.
+- Responsive portrait artwork remains embedded in the package with no runtime image request.
 
 ## Install
 
@@ -35,7 +36,7 @@ The package follows the standard DSH skin layout: host entry, browser client ent
 
 ## Visual contract
 
-V4 treats clarity as a functional requirement. The skin CSS must not apply global blur or shell-level backdrop filters, and it must not create a second composer background behind the actual input. Decorative layers are non-interactive and remain behind application content.
+V5 treats sharpness, local contrast and shell usability as functional requirements. The wide artwork must remain at least 3000×1900, the skin CSS must not blur the photographic layer or application shell, and the composer seat must never paint a second full-width background behind the actual input.
 
 ## License
 

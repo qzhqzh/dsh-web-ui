@@ -1,5 +1,5 @@
 /**
- * Neon Sleeper V4 — photography-first future sleeper cabin.
+ * Neon Sleeper V5 — high-definition photography-first future sleeper cabin.
  * The skin owns only its body scope, responsive artwork, theme state and favicon.
  */
 import type { Context } from '@deepseek-ai/cordis'
@@ -61,5 +61,5 @@ export function apply(ctx: Context): void {
       body.style.setProperty(property, value)
     }
     favicon.remove()
-  }, 'ui-skin-neon-sleeper: v4 photography-first surface')
+  }, 'ui-skin-neon-sleeper: v5 hd photography-first surface')
 }

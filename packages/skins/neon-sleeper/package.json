@@ -1,7 +1,7 @@
 {
   "name": "@linxin666/dsh-client-ui-skin-neon-sleeper",
-  "description": "Photography-first Neon Sleeper skin for the dsh web GUI: a clear futuristic maglev sleeper cabin with sparse sky details, quiet cool city light and warm bedside accents",
-  "version": "0.1.20",
+  "description": "HD photography-first Neon Sleeper skin for the dsh web GUI: 3172x1984 cabin artwork, clear translucent sidebars, no global blur or full-screen veil",
+  "version": "0.1.21",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

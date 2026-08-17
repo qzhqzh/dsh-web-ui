@@ -1,0 +1,92 @@
+name: Neon Sleeper V5 preview finalize
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v5-hd
+
+permissions:
+  contents: write
+
+concurrency:
+  group: neon-sleeper-v5-preview-finalize
+  cancel-in-progress: false
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v5-hd
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build and test Neon Sleeper V5
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+
+      - name: Verify V5 HD and no-blur contracts
+        run: |
+          grep -Fq 'WIDE_V5_LIGHT_PART_0' packages/skins/neon-sleeper/src/client/art.ts
+          if find packages/skins/neon-sleeper/src/client -name 'art-wide-v4-part*.ts' | grep -q .; then
+            echo 'legacy V4 wide art still present' >&2
+            exit 1
+          fi
+          if grep -Eq 'backdrop-filter:[[:space:]]*blur|filter:[^;]*blur\(' packages/skins/neon-sleeper/src/client/neon-sleeper.module.css; then
+            echo 'V5 must not blur the photographic layer or application shell' >&2
+            exit 1
+          fi
+          grep -Fq "[class*='composerSeat']" packages/skins/neon-sleeper/src/client/neon-sleeper.module.css
+          grep -Fq 'background: transparent !important' packages/skins/neon-sleeper/src/client/neon-sleeper.module.css
+
+      - name: Generate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+
+      - name: Install Chromium
+        run: pnpm dlx playwright@1.62.1 install --with-deps chromium
+
+      - name: Capture V5 previews
+        run: node scripts/capture-previews neon-sleeper --serve
+
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+
+      - name: Upload V5 previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v5-hd-previews
+          path: packages/skins/neon-sleeper/preview
+
+      - name: Commit generated V5 artifacts and remove temporary workflow
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm -f .github/workflows/neon-sleeper-v5-finalize.yml
+          git add -A
+          git commit -m 'feat(skins): finalize Neon Sleeper V5 HD assets'
+          git push origin HEAD:feat/neon-sleeper-v5-hd
