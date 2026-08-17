@@ -1,0 +1,8 @@
+/* V5 direct-original guard: display both user-supplied photographs without color filters or blur. */
+body[data-dsh-neon-sleeper]::before,
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::before {
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  image-rendering: auto;
+}
