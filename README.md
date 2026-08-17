@@ -405,7 +405,7 @@ A: 可以。聚合包的行 id 统一带 `web-ui-` 前缀（如 `web-ui-describe
   <a href="https://github.com/cncolder"><img src="https://github.com/cncolder.png?size=64" width="48" height="48" alt="cncolder" title="cncolder" /></a>
 </p>
 <p align="center">
-  <sub><a href="https://github.com/zhu1090093659/dsh-web-ui/graphs/contributors">查看全部贡献者</a></sub>
+  <sub><a href="https://github.com/qzhqzh/dsh-web-ui/graphs/contributors">查看全部贡献者</a></sub>
 </p>
 <!-- CONTRIBUTORS:END -->
 
