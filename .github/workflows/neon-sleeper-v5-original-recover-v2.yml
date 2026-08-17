@@ -1,0 +1,250 @@
+name: Neon Sleeper V5 native original recovery v2
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v5-hd
+
+permissions:
+  contents: write
+
+jobs:
+  recover-build-preview:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v5-hd
+          fetch-depth: 0
+
+      - name: Recover highest-quality native originals from Git objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          CANDIDATES=(
+            ebbd07ec0d0f4e143eea891eb961e05907771a0a
+            595ce0cf8c38a897f2c0675bf21daf2d5283c023
+            ce7fe77def2eb12f363ae862ecbc8aea009fda27
+            a10325729021d60fc6f6cff748b2427094716981
+          )
+          rm -f /tmp/light.b64 /tmp/dark.b64 /tmp/light.size /tmp/dark.size
+          echo 0 >/tmp/light.size
+          echo 0 >/tmp/dark.size
+
+          for sha in "${CANDIDATES[@]}"; do
+            gh api "/repos/${GITHUB_REPOSITORY}/git/blobs/${sha}" --jq '.content' | tr -d '\n' | base64 -d > /tmp/candidate.txt || continue
+            SHA="$sha" python3 - <<'PY'
+          import base64, os, re
+          from pathlib import Path
+          raw = Path('/tmp/candidate.txt').read_text(errors='ignore').strip()
+          m = re.search(r'data:image/webp;base64,([A-Za-z0-9+/=]+)', raw)
+          encoded = m.group(1) if m else raw if raw.startswith('UklGR') else ''
+          if not encoded:
+              raise SystemExit(0)
+          try:
+              data = base64.b64decode(encoded, validate=True)
+          except Exception:
+              raise SystemExit(0)
+          if not (data[:4] == b'RIFF' and data[8:12] == b'WEBP'):
+              raise SystemExit(0)
+          size = len(data)
+          light_sizes = {111584,154196,187272,248304,364742}
+          dark_sizes = {136968,186498,212234,299018,415556}
+          theme = 'light' if size in light_sizes else 'dark' if size in dark_sizes else None
+          if not theme:
+              print('ignored candidate', os.environ['SHA'], size)
+              raise SystemExit(0)
+          current = int(Path(f'/tmp/{theme}.size').read_text())
+          if size > current:
+              Path(f'/tmp/{theme}.size').write_text(str(size))
+              Path(f'/tmp/{theme}.b64').write_text(encoded)
+              print('selected', theme, os.environ['SHA'], size)
+          PY
+          done
+
+          test -s /tmp/light.b64
+          test -s /tmp/dark.b64
+          base64 -d /tmp/light.b64 > /tmp/light.webp
+          base64 -d /tmp/dark.b64 > /tmp/dark.webp
+          python3 - <<'PY'
+          from pathlib import Path
+          def dimensions(data):
+              kind=data[12:16]
+              if kind == b'VP8 ':
+                  return (int.from_bytes(data[26:28],'little') & 0x3fff, int.from_bytes(data[28:30],'little') & 0x3fff)
+              if kind == b'VP8L':
+                  bits=int.from_bytes(data[21:25],'little')
+                  return ((bits & 0x3fff)+1, ((bits >> 14)&0x3fff)+1)
+              raise ValueError(kind)
+          for theme in ('light','dark'):
+              data=Path(f'/tmp/{theme}.webp').read_bytes()
+              assert data[:4] == b'RIFF' and data[8:12] == b'WEBP'
+              assert dimensions(data)==(1672,941), (theme,dimensions(data),len(data))
+              print(theme, len(data), dimensions(data), data[12:16])
+          PY
+
+      - name: Install direct theme artwork and remove fake-HD path
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('packages/skins/neon-sleeper/src/client')
+          light=Path('/tmp/light.b64').read_text().strip()
+          dark=Path('/tmp/dark.b64').read_text().strip()
+          (root/'art-light-v5-direct.ts').write_text("export const NEON_SLEEPER_ART_LIGHT = 'data:image/webp;base64,"+light+"'\n",encoding='utf-8')
+          (root/'art-dark-v5-direct.ts').write_text("export const NEON_SLEEPER_ART_DARK = 'data:image/webp;base64,"+dark+"'\n",encoding='utf-8')
+          old=(root/'art.ts').read_text(encoding='utf-8')
+          icon=re.search(r"export const NEON_SLEEPER_ICON = '([^']+)'",old).group(1)
+          (root/'art.ts').write_text(f"""/** Neon Sleeper V5 uses two user-supplied 1672x941 originals at native resolution. No resize, super-resolution, blur, recoloring or theme filter is applied. */
+export {{ NEON_SLEEPER_ART_LIGHT }} from './art-light-v5-direct.ts'
+export {{ NEON_SLEEPER_ART_DARK }} from './art-dark-v5-direct.ts'
+export const NEON_SLEEPER_ART_WIDTH = 1672
+export const NEON_SLEEPER_ART_HEIGHT = 941
+export const NEON_SLEEPER_ICON = '{icon}'
+""",encoding='utf-8')
+          css=root/'neon-sleeper.module.css'
+          s=css.read_text(encoding='utf-8')
+          s=re.sub(r"\nbody\[data-dsh-neon-sleeper\]\[data-ds-dark-theme\]::before \{\n\s*filter:[^}]+\}\n",'\n',s)
+          css.write_text(s,encoding='utf-8')
+          (root/'neon-sleeper-direct-originals.module.css').write_text("""/* Direct user originals: no photography processing. */
+body[data-dsh-neon-sleeper]::before,
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::before {
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  image-rendering: auto;
+}
+""",encoding='utf-8')
+          for p in root.glob('art-wide-v5-part*.ts'): p.unlink()
+          for p in root.glob('art-portrait-part*.ts'): p.unlink()
+          PY
+
+      - name: Update tests, lifecycle labels and metadata
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re, textwrap
+          test=Path('packages/skins/neon-sleeper/tests/v5-art.spec.ts')
+          test.write_text(textwrap.dedent("""\
+          import { Buffer } from 'node:buffer'
+          import { readFileSync } from 'node:fs'
+          import { describe, expect, it } from 'vitest'
+          import { NEON_SLEEPER_ART_DARK, NEON_SLEEPER_ART_HEIGHT, NEON_SLEEPER_ART_LIGHT, NEON_SLEEPER_ART_WIDTH } from '../src/client/art.ts'
+
+          const cssSource = readFileSync(new URL('../src/client/neon-sleeper.module.css', import.meta.url), 'utf8')
+          const guardSource = readFileSync(new URL('../src/client/neon-sleeper-direct-originals.module.css', import.meta.url), 'utf8')
+
+          function dimensions(dataUrl: string) {
+            const bytes = Buffer.from(dataUrl.split(',', 2)[1], 'base64')
+            expect(bytes.length).toBeGreaterThan(90_000)
+            expect(bytes.subarray(0, 4).toString('ascii')).toBe('RIFF')
+            expect(bytes.subarray(8, 12).toString('ascii')).toBe('WEBP')
+            const kind = bytes.subarray(12, 16).toString('ascii')
+            if (kind === 'VP8 ') return { bytes, width: bytes.readUInt16LE(26) & 0x3fff, height: bytes.readUInt16LE(28) & 0x3fff }
+            expect(kind).toBe('VP8L')
+            const bits = bytes.readUInt32LE(21)
+            return { bytes, width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1 }
+          }
+
+          describe('Neon Sleeper V5 native-original contracts', () => {
+            it('ships separate native-resolution theme originals', () => {
+              const light = dimensions(NEON_SLEEPER_ART_LIGHT)
+              const dark = dimensions(NEON_SLEEPER_ART_DARK)
+              expect([light.width, light.height]).toEqual([1672, 941])
+              expect([dark.width, dark.height]).toEqual([1672, 941])
+              expect(NEON_SLEEPER_ART_WIDTH).toBe(1672)
+              expect(NEON_SLEEPER_ART_HEIGHT).toBe(941)
+              expect(light.bytes.equals(dark.bytes)).toBe(false)
+            })
+
+            it('does not blur, recolor, resize or veil photography', () => {
+              expect(cssSource).not.toMatch(/filter:[^;]*blur\\(/i)
+              expect(cssSource).not.toContain('body[data-dsh-neon-sleeper][data-ds-dark-theme]::before {\\n  filter:')
+              expect(cssSource).not.toContain('body[data-dsh-neon-sleeper]::after')
+              expect(guardSource).toContain('filter: none !important')
+              expect(guardSource).toContain('opacity: 1 !important')
+              expect(guardSource).toContain('transform: none !important')
+            })
+
+            it('keeps composer transparent and sidebar blur-free', () => {
+              expect(cssSource).toContain("[class*='composerSeat']")
+              expect(cssSource).toContain('background: transparent !important')
+              expect(cssSource).toContain("[role='navigation']")
+              expect(cssSource).toContain('backdrop-filter: none !important')
+            })
+          })
+          """), encoding='utf-8')
+
+          apply=Path('packages/skins/neon-sleeper/tests/apply.spec.ts')
+          s=apply.read_text(encoding='utf-8').replace("describe('neon-sleeper V4 apply'", "describe('neon-sleeper V5 native-original apply'")
+          s=s.replace('switches theme and portrait artwork without remounting','switches between separate theme originals without remounting')
+          apply.write_text(s,encoding='utf-8')
+
+          pp=Path('packages/skins/neon-sleeper/package.json'); obj=json.loads(pp.read_text())
+          obj['description']='Photography-first Neon Sleeper skin with separate user-supplied 1672x941 light and dark originals, no resize, fake-HD upscaling, blur or full-screen veil'
+          pp.write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n')
+          sp=Path('packages/skins/neon-sleeper/skin.json'); obj=json.loads(sp.read_text())
+          obj['description']='《夜航舱》V5：亮色与暗色分别直接使用用户提供的 1672×941 原图，在原始尺寸交付；不再使用低清图超分放大，不做背景模糊、二次调色、暗色滤镜或整屏雾化蒙版。侧边栏保持清透蓝白/深蓝双主题，composer 外层保持透明。'
+          sp.write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n')
+          PY
+
+      - name: Update bilingual docs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for filename in ('README.md','README.zh.md'):
+              p=Path('packages/skins/neon-sleeper')/filename
+              s=p.read_text(encoding='utf-8')
+              s=s.replace('3456×2160','1672×941').replace('3456x2160','1672x941')
+              s=s.replace('EDSR ×4','native-resolution direct artwork').replace('EDSR x4','native-resolution direct artwork').replace('EDSR ×4 超分辨率','原图直用').replace('EDSR ×4 高清背景重建','原图直用')
+              s=s.replace('高质量 WebP','原始尺寸高质量 WebP').replace('high-quality WebP','native-resolution high-quality WebP')
+              p.write_text(s,encoding='utf-8')
+          PY
+
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 11
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: node scripts/verify-docs.mjs --write packages/skins/neon-sleeper
+      - name: Build and test
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+      - name: Generate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+      - run: pnpm dlx playwright@1.62.1 install --with-deps chromium
+      - run: node scripts/capture-previews neon-sleeper --serve
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v5-native-original-previews
+          path: packages/skins/neon-sleeper/preview
+      - name: Commit final native-original state and remove temporary workflows
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          rm -f .github/workflows/neon-sleeper-v5-direct-finalize.yml
+          rm -f .github/workflows/neon-sleeper-v5-original-recover.yml
+          git rm -f .github/workflows/neon-sleeper-v5-original-recover-v2.yml
+          git add -A
+          git commit -m 'fix(skins): use native Neon Sleeper theme originals'
+          git push origin HEAD:feat/neon-sleeper-v5-hd
