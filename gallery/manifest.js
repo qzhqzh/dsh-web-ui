@@ -283,14 +283,14 @@ window.SKIN_MANIFEST = {
       "name": "夜航舱",
       "nameEn": "Neon Sleeper",
       "author": "qzhqzh",
-      "tagline": "清透未来夜行卧铺 · 都市夜景摄影 · 安静陪伴",
-      "description": "《夜航舱》V4：以清晰未来夜行列车卧铺摄影为主体，不使用全局模糊或大面积雾化遮罩；熟睡女孩与灰色长毛猫位于右侧，窗外未来城市与高速列车持续运行，左侧仅保留极少星点与远距交通光轨。界面以轻量半透明表面和高对比文字承载内容，保持 outside motion / inside stillness 的叙事。",
+      "tagline": "高清未来夜行卧铺 · 清透蓝白界面 · 安静陪伴",
+      "description": "《夜航舱》V5：桌面宽屏背景重新从原始卧铺舱图片制作，以 3172×1984 高质量 WebP 内嵌交付，不再从低分辨率中间图放大；摄影层无全局模糊和整屏雾化蒙版。亮色侧边栏采用清透蓝白半透明层级，暗色采用克制深蓝层级，composer 外层继续保持透明。",
       "tags": [
         "future-life",
         "maglev",
         "night",
         "photography",
-        "cozy",
+        "hd",
         "minimal"
       ],
       "accent": "#63b8e6",
