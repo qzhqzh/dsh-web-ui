@@ -1,0 +1,66 @@
+name: Neon Sleeper V5 generated sync
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v5-hd
+
+permissions:
+  contents: write
+
+concurrency:
+  group: neon-sleeper-v5-generated-sync
+  cancel-in-progress: false
+
+jobs:
+  sync-generated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v5-hd
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build and test Neon Sleeper V5
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+
+      - name: Regenerate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+
+      - name: Commit synchronized generated assets
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm -f .github/workflows/neon-sleeper-v5-sync.yml
+          git add -A
+          git commit -m 'chore(skins): sync Neon Sleeper V5 generated metadata'
+          git push origin HEAD:feat/neon-sleeper-v5-hd
