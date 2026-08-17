@@ -16,6 +16,7 @@ import {
 } from './hud-v3.ts'
 import './neon-sleeper.module.css'
 import './neon-sleeper-v3.module.css'
+import './neon-sleeper-v3-2.module.css'
 
 const OWNED_PROPERTIES = [
   'background-color',
