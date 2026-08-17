@@ -1,0 +1,172 @@
+name: Neon Sleeper V4 sharp-art pass
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v4-clean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: neon-sleeper-v4-sharp-art
+  cancel-in-progress: false
+
+jobs:
+  sharpen-build-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v4-clean
+
+      - name: Rebuild wide artwork for crisp rendering
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq imagemagick webp
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, re
+
+          source = Path('packages/skins/neon-sleeper/src/client/art-wide-part0.ts').read_text()
+          match = re.search(r"WIDE_PART_0\s*=\s*'([^']+)'", source)
+          if not match:
+              raise SystemExit('WIDE_PART_0 not found')
+          Path('/tmp/neon-wide-source.webp').write_bytes(base64.b64decode(match.group(1)))
+          PY
+
+          identify /tmp/neon-wide-source.webp
+          convert /tmp/neon-wide-source.webp \
+            -filter Lanczos \
+            -resize 200% \
+            -unsharp 0x0.72+0.62+0.01 \
+            -colorspace sRGB \
+            -quality 94 \
+            /tmp/neon-wide-v4.webp
+          identify /tmp/neon-wide-v4.webp
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+
+          root = Path('packages/skins/neon-sleeper/src/client')
+          encoded = base64.b64encode(Path('/tmp/neon-wide-v4.webp').read_bytes()).decode('ascii')
+          chunk_size = 24000
+          chunks = [encoded[i:i + chunk_size] for i in range(0, len(encoded), chunk_size)]
+          if len(chunks) > 16:
+              raise SystemExit(f'unexpectedly large sharpened artwork: {len(chunks)} chunks')
+
+          for old in root.glob('art-wide-v4-part*.ts'):
+              old.unlink()
+          for index, chunk in enumerate(chunks):
+              (root / f'art-wide-v4-part{index}.ts').write_text(
+                  f"export const WIDE_V4_PART_{index} = '{chunk}'\n",
+                  encoding='utf-8',
+              )
+
+          art = root / 'art.ts'
+          text = art.read_text(encoding='utf-8')
+          # Replace any previous wide imports and the exported wide expression while
+          # leaving portrait/icon assets untouched.
+          lines = [line for line in text.splitlines() if not (
+              "./art-wide-part" in line or "./art-wide-v4-part" in line
+          )]
+          text = '\n'.join(lines) + '\n'
+          import_block = ''.join(
+              f"import {{ WIDE_V4_PART_{i} }} from './art-wide-v4-part{i}.ts'\n"
+              for i in range(len(chunks))
+          )
+          marker = '/** Embedded artwork for the Neon Sleeper skin. */\n'
+          if marker not in text:
+              raise SystemExit('art.ts header marker missing')
+          text = text.replace(marker, marker + import_block, 1)
+
+          import re
+          wide_expr = "export const NEON_SLEEPER_ART_WIDE = 'data:image/webp;base64,' + " + ' + '.join(
+              f'WIDE_V4_PART_{i}' for i in range(len(chunks))
+          )
+          text, count = re.subn(
+              r"export const NEON_SLEEPER_ART_WIDE\s*=.*",
+              wide_expr,
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'wide export replacement count={count}')
+          art.write_text(text, encoding='utf-8')
+
+          old = root / 'art-wide-part0.ts'
+          if old.exists():
+              old.unlink()
+          print(f'embedded V4 wide art: {len(encoded)} base64 chars in {len(chunks)} chunks')
+          PY
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build and test Neon Sleeper
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+
+      - name: Verify V4 clarity and bundle identity
+        run: |
+          grep -Fq '@linxin666/dsh-client-ui-skin-neon-sleeper' packages/skins/neon-sleeper/lib/client.js
+          if grep -Fq '@linxin666/dsh-client-ui-skin-whale-song' packages/skins/neon-sleeper/lib/client.js; then
+            echo 'wrong whale-song module id detected' >&2
+            exit 1
+          fi
+          if grep -Eq 'backdrop-filter:[[:space:]]*blur|filter:[^;]*blur\(' packages/skins/neon-sleeper/src/client/neon-sleeper.module.css; then
+            echo 'V4 must not use blur' >&2
+            exit 1
+          fi
+          test "$(find packages/skins/neon-sleeper/src/client -name 'art-wide-v4-part*.ts' | wc -l)" -ge 2
+
+      - name: Generate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Capture V4 previews
+        run: node scripts/capture-previews neon-sleeper --serve
+
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+
+      - name: Upload V4 previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v4-sharp-previews
+          path: packages/skins/neon-sleeper/preview
+
+      - name: Commit sharpened V4 assets
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/neon-sleeper-v4-sharp-art.yml
+          git add -A
+          git commit -m 'feat(skins): sharpen Neon Sleeper V4 artwork [skip ci]'
+          git push origin HEAD:feat/neon-sleeper-v4-clean
