@@ -1,6 +1,6 @@
 {
   "name": "@linxin666/dsh-client-ui-skin-neon-sleeper",
-  "description": "HD photography-first Neon Sleeper skin for the dsh web GUI: 3172x1984 cabin artwork, clear translucent sidebars, no global blur or full-screen veil",
+  "description": "HD photography-first Neon Sleeper skin for the dsh web GUI: 3456x2160 EDSR-reconstructed cabin artwork, clear translucent sidebars, no global blur or full-screen veil",
   "version": "0.1.21",
   "type": "module",
   "main": "lib/index.js",
