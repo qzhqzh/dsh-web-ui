@@ -1,0 +1,45 @@
+name: Neon Sleeper V6 artwork preflight
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v6-original-artwork
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Audit source artwork chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_COMMIT=5552dfee827596e204468658a43cea2a2dd3c98e
+          gh api "/repos/${GITHUB_REPOSITORY}/contents/.github/workflows/neon-sleeper-v5-direct-finalize.yml?ref=${SOURCE_COMMIT}" \
+            --jq '.content' | tr -d '\n' | base64 -d > /tmp/source.yml
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          source = Path('/tmp/source.yml').read_text()
+          for theme in ('LIGHT', 'DARK'):
+              block = re.search(rf'{theme}_SHAS=\(\n(.*?)\n\s*\)', source, re.S).group(1)
+              shas = re.findall(r'\b[0-9a-f]{40}\b', block)
+              Path(f'/tmp/{theme.lower()}.shas').write_text('\n'.join(shas) + '\n')
+          PY
+          missing=0
+          for theme in light dark; do
+            index=0
+            while IFS= read -r sha; do
+              if ! gh api "/repos/${GITHUB_REPOSITORY}/git/blobs/${sha}" >/dev/null 2>&1; then
+                echo "MISSING ${theme} ${index} ${sha}"
+                missing=$((missing + 1))
+              fi
+              index=$((index + 1))
+            done < "/tmp/${theme}.shas"
+          done
+          echo "MISSING_TOTAL ${missing}"
+          test "${missing}" -eq 0
