@@ -22,8 +22,7 @@
     "docs:list": "node scripts/verify-docs.mjs --list",
     "docs:write-pair": "node scripts/verify-docs.mjs --write",
     "sync-shared": "node scripts/sync-shared.mjs",
-    "sync-shared:check": "node scripts/sync-shared.mjs --check",
-    "no-emoji": "node -e \"console.log('emoji check deferred to standard CI')\""
+    "sync-shared:check": "node scripts/sync-shared.mjs --check"
   },
   "devDependencies": {
     "lightningcss": "^1.32.0",
