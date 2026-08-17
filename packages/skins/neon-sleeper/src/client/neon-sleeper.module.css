@@ -526,8 +526,7 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme] {
 }
 
 body[data-dsh-neon-sleeper] [data-aionui-explorer-col],
-body[data-dsh-neon-sleeper] [data-aionui-preview-col],
-body[data-dsh-neon-sleeper] :global(.aionui-root) {
+body[data-dsh-neon-sleeper] [data-aionui-preview-col] {
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
   backdrop-filter: blur(14px) saturate(1.05);
 }
@@ -607,8 +606,10 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme] div:has(> div > [data-gitgraph-c
 
 /* Composer fade hides scrolled text without turning the entire input seat into
    a containing block for fixed dialogs. */
-body[data-dsh-neon-sleeper] [data-phase='active'] [class*='composerSeat'] {
+body[data-dsh-neon-sleeper] [class*='composerSeat'] {
   background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 body[data-dsh-neon-sleeper] [data-phase='active'] [class*='composerSeat']::before {
@@ -679,8 +680,7 @@ body[data-dsh-neon-sleeper] [class*='panel'],
 body[data-dsh-neon-sleeper] [class*='workspace'],
 body[data-dsh-neon-sleeper] [class*='explorer'],
 body[data-dsh-neon-sleeper] [class*='preview'],
-body[data-dsh-neon-sleeper] [class*='session'],
-body[data-dsh-neon-sleeper] [class*='composer'] {
+body[data-dsh-neon-sleeper] [class*='session'] {
   border-color: rgba(83, 151, 192, 0.18);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
 }

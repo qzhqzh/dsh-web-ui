@@ -17,7 +17,7 @@ body[data-dsh-neon-sleeper] {
   --dsw-specific-bubble: rgba(207, 232, 243, 0.56);
   --dsw-specific-bubble-highlight: rgba(181, 222, 240, 0.62);
   --dsw-specific-sidebar-fill: rgba(218, 232, 241, 0.72);
-  --dsw-specific-input-major: rgba(249, 252, 254, 0.80);
+  --dsw-specific-input-major: rgba(249, 252, 254, 0.74);
   --dsw-specific-login-input: rgba(249, 252, 254, 0.82);
   --aion-bg-base: rgba(232, 242, 248, 0.42);
   --aion-bg-1: rgba(242, 248, 251, 0.48);
@@ -39,7 +39,7 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme] {
   --dsw-specific-bubble: rgba(18, 55, 88, 0.62);
   --dsw-specific-bubble-highlight: rgba(35, 79, 112, 0.70);
   --dsw-specific-sidebar-fill: rgba(3, 14, 34, 0.79);
-  --dsw-specific-input-major: rgba(4, 19, 42, 0.72);
+  --dsw-specific-input-major: rgba(4, 19, 42, 0.68);
   --dsw-specific-login-input: rgba(4, 19, 42, 0.76);
   --aion-bg-base: rgba(3, 15, 35, 0.46);
   --aion-bg-1: rgba(5, 20, 43, 0.52);
@@ -113,14 +113,14 @@ body[data-dsh-neon-sleeper] [id='root']::before {
   content: '';
   position: fixed;
   inset: 8px 10px;
-  z-index: 2;
+  z-index: -1;
   pointer-events: none;
   background-image: var(--neon-sleeper-hud-wide);
   background-position: center;
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  opacity: 0.22;
-  filter: saturate(0.94) contrast(1.05) brightness(0.78);
+  opacity: 0.14;
+  filter: saturate(0.94) contrast(1.05) brightness(0.82);
   mix-blend-mode: multiply;
 }
 
@@ -131,25 +131,25 @@ body[data-dsh-neon-sleeper] [id='root']::after {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: -1;
   pointer-events: none;
   background-image: var(--neon-sleeper-hud-rail-left), var(--neon-sleeper-hud-rail-right);
-  background-position: calc(clamp(268px, 19.4vw, 302px) - 52px) center, right -12px center;
-  background-size: clamp(74px, 7vw, 112px) 100%, clamp(74px, 7vw, 112px) 100%;
+  background-position: calc(clamp(232px, 15.8vw, 286px) - 18px) center, right -14px center;
+  background-size: clamp(52px, 4vw, 68px) 100%, clamp(52px, 4vw, 68px) 100%;
   background-repeat: no-repeat;
-  opacity: 0.20;
-  filter: saturate(0.94) brightness(0.80);
+  opacity: 0.12;
+  filter: saturate(0.98) brightness(0.86);
   mix-blend-mode: multiply;
 }
 
 body[data-dsh-neon-sleeper][data-ds-dark-theme] [id='root']::before {
-  opacity: 0.34;
+  opacity: 0.24;
   filter: saturate(1.12) contrast(1.04) brightness(1.04);
   mix-blend-mode: screen;
 }
 
 body[data-dsh-neon-sleeper][data-ds-dark-theme] [id='root']::after {
-  opacity: 0.30;
+  opacity: 0.20;
   filter: saturate(1.12) brightness(1.03);
   mix-blend-mode: screen;
 }
@@ -157,8 +157,8 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme] [id='root']::after {
 body[data-dsh-neon-sleeper] [role='navigation'],
 body[data-dsh-neon-sleeper] [class*='sidebar'],
 body[data-dsh-neon-sleeper] [class*='leftPane'] {
-  -webkit-backdrop-filter: blur(18px) saturate(1.12);
-  backdrop-filter: blur(18px) saturate(1.12);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   border-right-color: rgba(70, 145, 188, 0.22);
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.12), 12px 0 34px rgba(16, 53, 81, 0.06);
 }
@@ -170,21 +170,11 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme] [class*='leftPane'] {
   box-shadow: inset -1px 0 0 rgba(148, 215, 246, 0.06), 14px 0 42px rgba(0, 0, 0, 0.16);
 }
 
-body[data-dsh-neon-sleeper] [class*='composer'],
-body[data-dsh-neon-sleeper] [data-composer],
-body[data-dsh-neon-sleeper] [data-phase='active'] [class*='composerSeat'] {
-  -webkit-backdrop-filter: blur(20px) saturate(1.10);
-  backdrop-filter: blur(20px) saturate(1.10);
-}
-
-body[data-dsh-neon-sleeper] [class*='composer'] {
-  border-color: rgba(76, 157, 202, 0.28);
-  box-shadow: 0 18px 44px rgba(10, 45, 72, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.32);
-}
-
-body[data-dsh-neon-sleeper][data-ds-dark-theme] [class*='composer'] {
-  border-color: rgba(104, 196, 239, 0.24);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(133, 211, 247, 0.08);
+/* Composer layout wrappers must remain inert. The actual rounded input
+   keeps its native token-driven glass surface, while the seat stays transparent. */
+body[data-dsh-neon-sleeper] [class*='composerSeat'] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait]::before {
@@ -197,22 +187,22 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme][data-dsh-neon-sleeper-portrait]:
 }
 
 body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait] [id='root']::before {
-  opacity: 0.10;
+  opacity: 0.07;
 }
 
 body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait] [id='root']::after {
   background-position: left -10px center, right -10px center;
-  background-size: clamp(66px, 16vw, 98px) 100%, clamp(66px, 16vw, 98px) 100%;
-  opacity: 0.34;
+  background-size: clamp(62px, 14vw, 88px) 100%, clamp(62px, 14vw, 88px) 100%;
+  opacity: 0.26;
 }
 
 body[data-dsh-neon-sleeper][data-ds-dark-theme][data-dsh-neon-sleeper-portrait] [id='root']::after {
-  opacity: 0.42;
+  opacity: 0.32;
 }
 
 @media (max-width: 920px) and (min-aspect-ratio: 4 / 5) {
   body[data-dsh-neon-sleeper] [id='root']::after {
-    background-position: calc(clamp(224px, 31vw, 276px) - 48px) center, right -10px center;
+    background-position: calc(clamp(214px, 27vw, 248px) - 16px) center, right -12px center;
   }
 }
 

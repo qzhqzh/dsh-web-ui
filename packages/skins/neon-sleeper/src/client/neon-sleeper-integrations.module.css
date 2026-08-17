@@ -59,8 +59,7 @@ body[data-dsh-neon-sleeper][data-ds-dark-theme] {
 }
 
 body[data-dsh-neon-sleeper] [data-aionui-explorer-col],
-body[data-dsh-neon-sleeper] [data-aionui-preview-col],
-body[data-dsh-neon-sleeper] :global(.aionui-root) {
+body[data-dsh-neon-sleeper] [data-aionui-preview-col] {
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
   backdrop-filter: blur(14px) saturate(1.05);
 }
