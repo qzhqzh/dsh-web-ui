@@ -22,35 +22,26 @@ afterEach(async () => {
   delete document.body.dataset.dshNeonSleeper
   delete document.body.dataset.dsDarkTheme
   document.body.style.cssText = ''
-  Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 })
-  Object.defineProperty(window, 'innerHeight', { configurable: true, value: 768 })
 })
 
-describe('neon-sleeper V5 apply', () => {
-  it('mounts the responsive photo and favicon', async () => {
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1440 })
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 900 })
+describe('neon-sleeper V5 direct-original apply', () => {
+  it('mounts the light original and favicon', async () => {
     fiber = await mount()
-
     expect(document.body.dataset.dshNeonSleeper).toBe('')
     expect(document.body.style.getPropertyValue('--neon-sleeper-art')).toContain('data:image/webp;base64')
     expect(document.head.querySelector('link[data-neon-sleeper-icon]')).not.toBeNull()
   })
 
-  it('switches theme and portrait artwork without remounting', async () => {
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1440 })
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 900 })
+  it('switches to the separate dark original without remounting', async () => {
     fiber = await mount()
-    const wide = document.body.style.getPropertyValue('--neon-sleeper-art')
+    const light = document.body.style.getPropertyValue('--neon-sleeper-art')
 
     document.body.dataset.dsDarkTheme = ''
     await tick()
-    expect(document.body.style.getPropertyValue('background-color')).toBe('rgb(6, 20, 38)')
 
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 600 })
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 1000 })
-    window.dispatchEvent(new Event('resize'))
-    expect(document.body.style.getPropertyValue('--neon-sleeper-art')).not.toBe(wide)
+    const dark = document.body.style.getPropertyValue('--neon-sleeper-art')
+    expect(dark).not.toBe(light)
+    expect(document.body.style.getPropertyValue('background-color')).toBe('rgb(6, 20, 38)')
   })
 
   it('restores all inline state on dispose', async () => {
