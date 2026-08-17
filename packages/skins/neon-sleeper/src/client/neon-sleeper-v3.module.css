@@ -1,0 +1,224 @@
+/* Neon Sleeper V3: preserve photographic contrast, use both generated HUD
+   studies as real runtime artwork, and separate workspace / sidebar / composer
+   opacity instead of covering the whole application with one milky veil. */
+
+body[data-dsh-neon-sleeper] {
+  isolation: isolate;
+  --dsw-alias-bg-base: rgba(226, 239, 247, 0.20);
+  --dsw-alias-bg-layer-1: rgba(238, 246, 250, 0.30);
+  --dsw-alias-bg-layer-2: rgba(225, 238, 246, 0.39);
+  --dsw-alias-bg-layer-3: rgba(213, 231, 241, 0.50);
+  --dsw-alias-bg-module-platform: rgba(226, 239, 247, 0.34);
+  --dsw-alias-bg-overlay: rgba(244, 249, 252, 0.90);
+  --dsw-alias-button-elevated-fill: rgba(249, 252, 254, 0.84);
+  --dsw-alias-button-floating-fill: rgba(249, 252, 254, 0.84);
+  --dsw-alias-markdown-code-block: rgba(236, 245, 250, 0.66);
+  --dsw-alias-markdown-code-block-banner: rgba(236, 245, 250, 0.72);
+  --dsw-specific-bubble: rgba(207, 232, 243, 0.56);
+  --dsw-specific-bubble-highlight: rgba(181, 222, 240, 0.62);
+  --dsw-specific-sidebar-fill: rgba(218, 232, 241, 0.72);
+  --dsw-specific-input-major: rgba(249, 252, 254, 0.80);
+  --dsw-specific-login-input: rgba(249, 252, 254, 0.82);
+  --aion-bg-base: rgba(232, 242, 248, 0.42);
+  --aion-bg-1: rgba(242, 248, 251, 0.48);
+  --aion-bg-2: rgba(226, 239, 247, 0.54);
+  --aion-overlay-shadow: 0 18px 52px rgba(7, 27, 49, 0.22);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+  --dsw-alias-bg-base: rgba(3, 13, 31, 0.23);
+  --dsw-alias-bg-layer-1: rgba(5, 18, 39, 0.34);
+  --dsw-alias-bg-layer-2: rgba(7, 24, 49, 0.44);
+  --dsw-alias-bg-layer-3: rgba(10, 31, 60, 0.54);
+  --dsw-alias-bg-module-platform: rgba(5, 18, 39, 0.38);
+  --dsw-alias-bg-overlay: rgba(7, 23, 47, 0.90);
+  --dsw-alias-button-elevated-fill: rgba(11, 33, 62, 0.82);
+  --dsw-alias-button-floating-fill: rgba(11, 33, 62, 0.82);
+  --dsw-alias-markdown-code-block: rgba(5, 20, 43, 0.70);
+  --dsw-alias-markdown-code-block-banner: rgba(7, 24, 49, 0.76);
+  --dsw-specific-bubble: rgba(18, 55, 88, 0.62);
+  --dsw-specific-bubble-highlight: rgba(35, 79, 112, 0.70);
+  --dsw-specific-sidebar-fill: rgba(3, 14, 34, 0.79);
+  --dsw-specific-input-major: rgba(4, 19, 42, 0.72);
+  --dsw-specific-login-input: rgba(4, 19, 42, 0.76);
+  --aion-bg-base: rgba(3, 15, 35, 0.46);
+  --aion-bg-1: rgba(5, 20, 43, 0.52);
+  --aion-bg-2: rgba(7, 25, 51, 0.60);
+  --aion-overlay-shadow: 0 20px 58px rgba(0, 0, 0, 0.48);
+}
+
+/* Fixed photographic layer. Light and dark modes grade the same composition
+   independently, avoiding the washed-out light veil and crushed dark shadows. */
+body[data-dsh-neon-sleeper]::before {
+  content: '';
+  position: fixed;
+  inset: -2px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  mix-blend-mode: normal;
+  background-color: transparent;
+  background-image: var(--neon-sleeper-art);
+  background-position: right center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: brightness(0.90) contrast(1.16) saturate(1.10);
+  transform: scale(1.004);
+  transform-origin: center;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::before {
+  filter: brightness(1.22) contrast(0.96) saturate(1.12);
+}
+
+/* Scrim is deliberately subtle. Opaque responsibility is moved to the sidebar,
+   composer and overlays instead of flattening the entire photograph. */
+body[data-dsh-neon-sleeper]::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  mix-blend-mode: normal;
+  background:
+    linear-gradient(rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 0%, rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 100%),
+    radial-gradient(circle at 94% 8%, rgba(238, 190, 139, 0.08) 0%, rgba(238, 190, 139, 0.03) 18%, transparent 36%),
+    linear-gradient(90deg, rgba(4, 18, 39, 0.08) 0%, rgba(4, 18, 39, 0.02) 44%, rgba(4, 18, 39, 0.04) 100%),
+    linear-gradient(180deg, rgba(4, 14, 32, 0.01) 0%, rgba(4, 14, 32, 0.10) 100%);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::after {
+  background:
+    linear-gradient(rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 0%, rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 100%),
+    radial-gradient(circle at 92% 10%, rgba(231, 181, 127, 0.09) 0%, rgba(231, 181, 127, 0.03) 20%, transparent 38%),
+    linear-gradient(90deg, rgba(1, 6, 18, 0.14) 0%, rgba(1, 6, 18, 0.04) 52%, rgba(1, 6, 18, 0.025) 100%),
+    linear-gradient(180deg, rgba(1, 6, 18, 0.015) 0%, rgba(1, 6, 18, 0.10) 100%);
+}
+
+body[data-dsh-neon-sleeper] [id='root'] {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* The generated wide HUD is now used directly above the application panes. */
+body[data-dsh-neon-sleeper] [id='root']::before {
+  content: '';
+  position: fixed;
+  inset: 8px 10px;
+  z-index: 2;
+  pointer-events: none;
+  background-image: var(--neon-sleeper-hud-wide);
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  filter: saturate(0.94) contrast(1.05) brightness(0.78);
+  mix-blend-mode: multiply;
+}
+
+/* The portrait HUD study is cropped into two real vertical rails. On desktop
+   the left rail follows the sidebar boundary; on portrait it returns to both
+   screen edges. */
+body[data-dsh-neon-sleeper] [id='root']::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: var(--neon-sleeper-hud-rail-left), var(--neon-sleeper-hud-rail-right);
+  background-position: calc(clamp(268px, 19.4vw, 302px) - 52px) center, right -12px center;
+  background-size: clamp(74px, 7vw, 112px) 100%, clamp(74px, 7vw, 112px) 100%;
+  background-repeat: no-repeat;
+  opacity: 0.20;
+  filter: saturate(0.94) brightness(0.80);
+  mix-blend-mode: multiply;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [id='root']::before {
+  opacity: 0.34;
+  filter: saturate(1.12) contrast(1.04) brightness(1.04);
+  mix-blend-mode: screen;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [id='root']::after {
+  opacity: 0.30;
+  filter: saturate(1.12) brightness(1.03);
+  mix-blend-mode: screen;
+}
+
+body[data-dsh-neon-sleeper] [role='navigation'],
+body[data-dsh-neon-sleeper] [class*='sidebar'],
+body[data-dsh-neon-sleeper] [class*='leftPane'] {
+  -webkit-backdrop-filter: blur(18px) saturate(1.12);
+  backdrop-filter: blur(18px) saturate(1.12);
+  border-right-color: rgba(70, 145, 188, 0.22);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.12), 12px 0 34px rgba(16, 53, 81, 0.06);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [role='navigation'],
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [class*='sidebar'],
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [class*='leftPane'] {
+  border-right-color: rgba(108, 196, 239, 0.18);
+  box-shadow: inset -1px 0 0 rgba(148, 215, 246, 0.06), 14px 0 42px rgba(0, 0, 0, 0.16);
+}
+
+body[data-dsh-neon-sleeper] [class*='composer'],
+body[data-dsh-neon-sleeper] [data-composer],
+body[data-dsh-neon-sleeper] [data-phase='active'] [class*='composerSeat'] {
+  -webkit-backdrop-filter: blur(20px) saturate(1.10);
+  backdrop-filter: blur(20px) saturate(1.10);
+}
+
+body[data-dsh-neon-sleeper] [class*='composer'] {
+  border-color: rgba(76, 157, 202, 0.28);
+  box-shadow: 0 18px 44px rgba(10, 45, 72, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [class*='composer'] {
+  border-color: rgba(104, 196, 239, 0.24);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(133, 211, 247, 0.08);
+}
+
+body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait]::before {
+  background-position: center;
+  filter: brightness(0.92) contrast(1.10) saturate(1.06);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme][data-dsh-neon-sleeper-portrait]::before {
+  filter: brightness(1.12) contrast(0.98) saturate(1.10);
+}
+
+body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait] [id='root']::before {
+  opacity: 0.10;
+}
+
+body[data-dsh-neon-sleeper][data-dsh-neon-sleeper-portrait] [id='root']::after {
+  background-position: left -10px center, right -10px center;
+  background-size: clamp(66px, 16vw, 98px) 100%, clamp(66px, 16vw, 98px) 100%;
+  opacity: 0.34;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme][data-dsh-neon-sleeper-portrait] [id='root']::after {
+  opacity: 0.42;
+}
+
+@media (max-width: 920px) and (min-aspect-ratio: 4 / 5) {
+  body[data-dsh-neon-sleeper] [id='root']::after {
+    background-position: calc(clamp(224px, 31vw, 276px) - 48px) center, right -10px center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-dsh-neon-sleeper] [id='root']::before,
+  body[data-dsh-neon-sleeper] [id='root']::after {
+    transition: none;
+  }
+}
