@@ -39,18 +39,25 @@ jobs:
           PY
 
       - name: Install HD reconstruction tools
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python3 -m pip install --disable-pip-version-check opencv-contrib-python-headless==4.10.0.84
           sudo apt-get update -qq
           sudo apt-get install -y -qq webp
-          curl -L --fail --retry 3 \
-            https://github.com/Saafke/EDSR_Tensorflow/raw/master/models/EDSR_x4.pb \
-            -o /tmp/EDSR_x4.pb
+          if ! curl -L --fail --retry 4 --retry-all-errors \
+            https://raw.githubusercontent.com/Saafke/EDSR_Tensorflow/master/models/EDSR_x4.pb \
+            -o /tmp/EDSR_x4.pb; then
+            gh api \
+              -H 'Accept: application/vnd.github.raw' \
+              '/repos/Saafke/EDSR_Tensorflow/contents/models/EDSR_x4.pb?ref=master' \
+              > /tmp/EDSR_x4.pb
+          fi
+          test "$(stat -c%s /tmp/EDSR_x4.pb)" -gt 30000000
 
       - name: Rebuild wide background with EDSR x4
         run: |
           python3 - <<'PY'
-          from pathlib import Path
           import cv2
 
           source = cv2.imread('/tmp/neon-v5-source.webp', cv2.IMREAD_COLOR)
