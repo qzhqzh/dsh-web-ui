@@ -9,6 +9,7 @@ import {
   NEON_SLEEPER_ICON,
 } from './art.ts'
 import './neon-sleeper.module.css'
+import './neon-sleeper-direct-originals.module.css'
 
 const OWNED_PROPERTIES = [
   'background-color',
