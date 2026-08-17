@@ -1,0 +1,299 @@
+name: Neon Sleeper V3.2 clarity pass
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v3-2-clarity
+
+permissions:
+  contents: write
+
+concurrency:
+  group: neon-sleeper-v3-2-clarity
+  cancel-in-progress: false
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v3-2-clarity
+
+      - name: Apply V3.2 clarity and typography pass
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          css = r'''/* Neon Sleeper V3.2: clearer photography, a localized transparent veil,
+   sparse distant-sky details and stronger text hierarchy. */
+
+body[data-dsh-neon-sleeper] {
+  --dsw-alias-bg-base: rgba(224, 238, 247, 0.08);
+  --dsw-alias-bg-layer-1: rgba(238, 247, 251, 0.15);
+  --dsw-alias-bg-layer-2: rgba(226, 239, 247, 0.23);
+  --dsw-alias-bg-layer-3: rgba(215, 232, 242, 0.33);
+  --dsw-alias-bg-module-platform: rgba(229, 241, 248, 0.17);
+  --dsw-specific-sidebar-fill: rgba(220, 234, 243, 0.88);
+  --dsw-specific-input-major: rgba(248, 252, 254, 0.62);
+  --dsw-specific-bubble: rgba(224, 239, 247, 0.60);
+  --dsw-specific-bubble-highlight: rgba(201, 228, 241, 0.70);
+  --dsw-alias-label-primary: #0b2035;
+  --dsw-alias-label-secondary: #2d5068;
+  --dsw-alias-label-tertiary: #55758a;
+  --dsw-alias-label-caption: #416a83;
+  --dsw-alias-label-primary-dimmed: #3e637a;
+  --dsw-alias-state-business-primary: #167ca8;
+  --dsw-alias-state-error-primary: #b73f4d;
+  --dsw-alias-state-error-secondary: #cb5b66;
+  --dsw-alias-state-success-primary: #2e7d68;
+  --dsw-alias-state-warn-primary: #9a662f;
+  --aion-bg-base: rgba(232, 242, 248, 0.24);
+  --aion-bg-1: rgba(242, 248, 251, 0.32);
+  --aion-bg-2: rgba(226, 239, 247, 0.40);
+  --aion-text-primary: #0b2035;
+  --aion-text-secondary: #2d5068;
+  --aion-text-tertiary: #55758a;
+  --aion-primary: #167ca8;
+  color: var(--dsw-alias-label-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+  --dsw-alias-bg-base: rgba(3, 13, 31, 0.11);
+  --dsw-alias-bg-layer-1: rgba(5, 18, 39, 0.19);
+  --dsw-alias-bg-layer-2: rgba(7, 24, 49, 0.29);
+  --dsw-alias-bg-layer-3: rgba(10, 31, 60, 0.39);
+  --dsw-alias-bg-module-platform: rgba(5, 18, 39, 0.23);
+  --dsw-specific-sidebar-fill: rgba(3, 14, 34, 0.84);
+  --dsw-specific-input-major: rgba(4, 19, 42, 0.56);
+  --dsw-specific-bubble: rgba(18, 55, 88, 0.58);
+  --dsw-specific-bubble-highlight: rgba(35, 79, 112, 0.68);
+  --dsw-alias-label-primary: #f2f8fc;
+  --dsw-alias-label-secondary: #c9dce7;
+  --dsw-alias-label-tertiary: #9cb7c8;
+  --dsw-alias-label-caption: #82a2b6;
+  --dsw-alias-label-primary-dimmed: #b0c7d5;
+  --dsw-alias-state-business-primary: #8ed5f7;
+  --dsw-alias-state-error-primary: #ff9099;
+  --dsw-alias-state-error-secondary: #ffabb2;
+  --dsw-alias-state-success-primary: #7cc7ae;
+  --dsw-alias-state-warn-primary: #f0c78e;
+  --aion-bg-base: rgba(3, 15, 35, 0.28);
+  --aion-bg-1: rgba(5, 20, 43, 0.36);
+  --aion-bg-2: rgba(7, 25, 51, 0.44);
+  --aion-text-primary: #f2f8fc;
+  --aion-text-secondary: #c9dce7;
+  --aion-text-tertiary: #9cb7c8;
+  --aion-primary: #8ed5f7;
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Remove the fractional scale that softened the source through interpolation. */
+body[data-dsh-neon-sleeper]::before {
+  inset: 0;
+  transform: none;
+  filter: brightness(1.02) contrast(1.13) saturate(1.12);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::before {
+  filter: brightness(1.16) contrast(1.04) saturate(1.12);
+}
+
+/* The veil is directional rather than uniform. Sparse stars and two distant
+   traffic streaks occupy only the quiet upper-left sky area. */
+body[data-dsh-neon-sleeper]::after {
+  background:
+    linear-gradient(rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 0%, rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 100%),
+    radial-gradient(circle at 21% 11%, rgba(246, 252, 255, 0.80) 0 0.8px, rgba(176, 220, 244, 0.20) 1px 3px, transparent 4px),
+    radial-gradient(circle at 25% 24%, rgba(222, 244, 255, 0.64) 0 0.7px, transparent 1.6px),
+    radial-gradient(circle at 31% 8%, rgba(238, 249, 255, 0.72) 0 0.8px, transparent 1.8px),
+    radial-gradient(circle at 36% 19%, rgba(185, 224, 246, 0.58) 0 0.7px, transparent 1.7px),
+    radial-gradient(circle at 43% 12%, rgba(236, 247, 255, 0.62) 0 0.7px, transparent 1.6px),
+    radial-gradient(circle at 47% 30%, rgba(180, 216, 242, 0.46) 0 0.7px, transparent 1.6px),
+    radial-gradient(circle at 28% 34%, rgba(222, 240, 255, 0.52) 0 0.7px, transparent 1.7px),
+    radial-gradient(circle at 52% 17%, rgba(198, 185, 236, 0.42) 0 0.8px, transparent 1.8px),
+    linear-gradient(90deg, transparent, rgba(121, 197, 236, 0.30), transparent) 23% 16% / 126px 1px no-repeat,
+    linear-gradient(90deg, transparent, rgba(164, 208, 239, 0.20), transparent) 39% 7% / 86px 1px no-repeat,
+    radial-gradient(circle at 94% 8%, rgba(238, 190, 139, 0.055) 0%, rgba(238, 190, 139, 0.018) 18%, transparent 36%),
+    linear-gradient(90deg, rgba(218, 233, 242, 0.16) 16%, rgba(218, 233, 242, 0.09) 50%, rgba(218, 233, 242, 0.018) 78%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(3, 10, 24, 0.035) 100%);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme]::after {
+  background:
+    linear-gradient(rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 0%, rgb(3 9 22 / var(--dsw-skin-scrim, 0)) 100%),
+    radial-gradient(circle at 21% 11%, rgba(205, 239, 255, 0.80) 0 0.8px, rgba(86, 174, 224, 0.28) 1px 3px, transparent 4px),
+    radial-gradient(circle at 25% 24%, rgba(157, 215, 247, 0.66) 0 0.7px, transparent 1.7px),
+    radial-gradient(circle at 31% 8%, rgba(208, 240, 255, 0.72) 0 0.8px, transparent 1.8px),
+    radial-gradient(circle at 36% 19%, rgba(120, 192, 233, 0.58) 0 0.7px, transparent 1.7px),
+    radial-gradient(circle at 43% 12%, rgba(190, 229, 250, 0.62) 0 0.7px, transparent 1.6px),
+    radial-gradient(circle at 47% 30%, rgba(112, 176, 218, 0.48) 0 0.7px, transparent 1.6px),
+    radial-gradient(circle at 28% 34%, rgba(170, 214, 242, 0.54) 0 0.7px, transparent 1.7px),
+    radial-gradient(circle at 52% 17%, rgba(171, 151, 225, 0.48) 0 0.8px, transparent 1.8px),
+    linear-gradient(90deg, transparent, rgba(92, 184, 232, 0.28), transparent) 23% 16% / 126px 1px no-repeat,
+    linear-gradient(90deg, transparent, rgba(120, 174, 217, 0.20), transparent) 39% 7% / 86px 1px no-repeat,
+    radial-gradient(circle at 94% 8%, rgba(231, 181, 127, 0.065) 0%, rgba(231, 181, 127, 0.022) 20%, transparent 38%),
+    linear-gradient(90deg, rgba(1, 7, 18, 0.18) 16%, rgba(1, 7, 18, 0.10) 54%, rgba(1, 7, 18, 0.025) 80%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(1, 6, 18, 0.06) 100%);
+}
+
+/* HUD remains present as cabin hardware, but it no longer acts like another veil. */
+body[data-dsh-neon-sleeper] [id='root']::before {
+  opacity: 0.10;
+  filter: saturate(0.96) contrast(1.04) brightness(1.02);
+  mix-blend-mode: soft-light;
+}
+
+body[data-dsh-neon-sleeper] [id='root']::after {
+  opacity: 0.075;
+  filter: saturate(0.98) brightness(1.02);
+  mix-blend-mode: soft-light;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [id='root']::before {
+  opacity: 0.16;
+  filter: saturate(1.08) contrast(1.03) brightness(1.04);
+  mix-blend-mode: screen;
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [id='root']::after {
+  opacity: 0.12;
+  filter: saturate(1.08) brightness(1.03);
+  mix-blend-mode: screen;
+}
+
+/* Text uses stronger semantic tokens and a restrained contrast shadow. */
+body[data-dsh-neon-sleeper] [role='main'],
+body[data-dsh-neon-sleeper] [data-phase] {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [role='main'],
+body[data-dsh-neon-sleeper][data-ds-dark-theme] [data-phase] {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.42);
+}
+
+body[data-dsh-neon-sleeper] [data-composer],
+body[data-dsh-neon-sleeper] [data-composer] * {
+  text-shadow: none;
+}
+
+body[data-dsh-neon-sleeper] [role='tab'],
+body[data-dsh-neon-sleeper] [aria-current='page'],
+body[data-dsh-neon-sleeper] [role='alert'] {
+  font-weight: 500;
+}
+
+@media (max-aspect-ratio: 4 / 5) {
+  body[data-dsh-neon-sleeper] {
+    --dsw-alias-bg-base: rgba(224, 238, 247, 0.18);
+    --dsw-specific-sidebar-fill: rgba(220, 234, 243, 0.84);
+    --dsw-specific-input-major: rgba(248, 252, 254, 0.70);
+  }
+
+  body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+    --dsw-alias-bg-base: rgba(3, 13, 31, 0.22);
+    --dsw-specific-sidebar-fill: rgba(3, 14, 34, 0.86);
+    --dsw-specific-input-major: rgba(4, 19, 42, 0.66);
+  }
+}
+'''
+
+          Path('packages/skins/neon-sleeper/src/client/neon-sleeper-v3-2.module.css').write_text(css)
+
+          index_path = Path('packages/skins/neon-sleeper/src/client/index.ts')
+          index = index_path.read_text()
+          marker = "import './neon-sleeper-v3.module.css'\n"
+          if index.count(marker) != 1:
+              raise SystemExit('unexpected V3 import count')
+          index = index.replace(marker, marker + "import './neon-sleeper-v3-2.module.css'\n", 1)
+          index_path.write_text(index)
+
+          test_path = Path('packages/skins/neon-sleeper/tests/css-contract.spec.ts')
+          test = test_path.read_text()
+          marker = "const v3Css = readFileSync(new URL('../src/client/neon-sleeper-v3.module.css', import.meta.url), 'utf8')\n"
+          if test.count(marker) != 1:
+              raise SystemExit('unexpected V3 test constant count')
+          test = test.replace(marker, marker + "const v32Css = readFileSync(new URL('../src/client/neon-sleeper-v3-2.module.css', import.meta.url), 'utf8')\n", 1)
+          closing = '\n})\n'
+          if not test.endswith(closing):
+              raise SystemExit('unexpected CSS contract test ending')
+          extra = r'''
+
+  it('keeps the photo layer unscaled and uses a localized clarity veil', () => {
+    expect(v32Css).toContain('transform: none')
+    expect(v32Css).toContain('--dsw-alias-bg-base: rgba(224, 238, 247, 0.08)')
+    expect(v32Css).toContain('circle at 21% 11%')
+    expect(v32Css).toContain('rgba(218, 233, 242, 0.16)')
+  })
+
+  it('strengthens semantic text contrast without styling the composer text', () => {
+    expect(v32Css).toContain('--dsw-alias-state-business-primary: #167ca8')
+    expect(v32Css).toContain('--dsw-alias-state-error-primary: #b73f4d')
+    expect(v32Css).toContain("body[data-dsh-neon-sleeper] [data-composer] *")
+    expect(v32Css).toContain('text-shadow: none')
+  })
+'''
+          test = test[:-len(closing)] + extra + closing
+          test_path.write_text(test)
+          PY
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build and test skin
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+
+      - name: Generate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Capture previews
+        run: node scripts/capture-previews neon-sleeper --serve
+
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm aggregate:check
+          pnpm docs:check
+
+      - name: Upload previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v3-2-previews
+          path: packages/skins/neon-sleeper/preview
+
+      - name: Commit V3.2 and generated artifacts
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/neon-sleeper-v3-2-build.yml
+          git add -A
+          git commit -m "feat(skins): refine Neon Sleeper V3.2 clarity [skip ci]"
+          git push origin HEAD:feat/neon-sleeper-v3-2-clarity
