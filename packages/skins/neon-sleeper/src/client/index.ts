@@ -1,11 +1,11 @@
 /**
- * Neon Sleeper V5 — high-definition photography-first future sleeper cabin.
- * The skin owns only its body scope, responsive artwork, theme state and favicon.
+ * Neon Sleeper V5 - direct-original photography-first future cabin.
+ * Light and dark themes use separate user-supplied artwork with no fake HD upscaling.
  */
 import type { Context } from '@deepseek-ai/cordis'
 import {
-  NEON_SLEEPER_ART_PORTRAIT,
-  NEON_SLEEPER_ART_WIDE,
+  NEON_SLEEPER_ART_DARK,
+  NEON_SLEEPER_ART_LIGHT,
   NEON_SLEEPER_ICON,
 } from './art.ts'
 import './neon-sleeper.module.css'
@@ -14,10 +14,6 @@ const OWNED_PROPERTIES = [
   'background-color',
   '--neon-sleeper-art',
 ] as const
-
-function usesPortraitArt(): boolean {
-  return window.innerWidth / Math.max(window.innerHeight, 1) < 0.84
-}
 
 export function apply(ctx: Context): void {
   const body = document.body
@@ -28,23 +24,22 @@ export function apply(ctx: Context): void {
 
   body.dataset.dshNeonSleeper = ''
 
-  const update = (): void => {
+  const updateTheme = (): void => {
     const dark = body.dataset.dsDarkTheme !== undefined
     body.style.setProperty(
       '--neon-sleeper-art',
-      `url(${usesPortraitArt() ? NEON_SLEEPER_ART_PORTRAIT : NEON_SLEEPER_ART_WIDE})`,
+      `url(${dark ? NEON_SLEEPER_ART_DARK : NEON_SLEEPER_ART_LIGHT})`,
     )
     body.style.setProperty('background-color', dark ? '#061426' : '#dce9f1')
   }
 
-  update()
+  updateTheme()
 
-  const observer = new MutationObserver(update)
+  const observer = new MutationObserver(updateTheme)
   observer.observe(body, {
     attributes: true,
     attributeFilter: ['data-ds-dark-theme'],
   })
-  window.addEventListener('resize', update, { passive: true })
 
   const favicon = document.createElement('link')
   favicon.rel = 'icon'
@@ -56,10 +51,9 @@ export function apply(ctx: Context): void {
   ctx.effect(() => () => {
     delete body.dataset.dshNeonSleeper
     observer.disconnect()
-    window.removeEventListener('resize', update)
     for (const [property, value] of previous) {
       body.style.setProperty(property, value)
     }
     favicon.remove()
-  }, 'ui-skin-neon-sleeper: v5 hd photography-first surface')
+  }, 'ui-skin-neon-sleeper: v5 direct-original photography surface')
 }
