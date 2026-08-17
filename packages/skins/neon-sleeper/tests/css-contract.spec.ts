@@ -3,29 +3,33 @@ import { describe, expect, it } from 'vitest'
 
 const css = readFileSync(new URL('../src/client/neon-sleeper.module.css', import.meta.url), 'utf8')
 
-describe('neon-sleeper V4 CSS contract', () => {
-  it('keeps the photography layer sharp', () => {
+describe('neon-sleeper V5 CSS contract', () => {
+  it('keeps the photography layer sharp and fully visible', () => {
     expect(css).toContain('background-image: var(--neon-sleeper-art)')
-    expect(css).not.toContain('backdrop-filter')
-    expect(css).not.toContain('blur(')
+    expect(css).toContain('opacity: 1;')
+    expect(css).not.toMatch(/filter:[^;]*blur\(/i)
+    expect(css).not.toMatch(/backdrop-filter:\s*blur/i)
     expect(css).not.toContain('transform: scale(')
+    expect(css).not.toContain('body[data-dsh-neon-sleeper]::after')
   })
 
   it('keeps the composer seat transparent', () => {
     expect(css).toContain("[class*='composerSeat']")
     expect(css).toContain('background: transparent !important')
-    expect(css).not.toContain("[class*='composer'] {\n  background:")
+    expect(css).toContain('content: none !important')
   })
 
-  it('uses sparse sky details instead of a broad veil', () => {
-    expect(css).toContain('radial-gradient(circle at 11% 10%')
-    expect(css).toContain('linear-gradient(104deg')
+  it('uses a blur-free translucent sidebar for both themes', () => {
+    expect(css).toContain("[role='navigation']")
+    expect(css).toContain('rgba(244, 250, 253, 0.91)')
+    expect(css).toContain('rgba(5, 21, 44, 0.88)')
+    expect(css).toContain('backdrop-filter: none !important')
   })
 
   it('defines readable semantic text colors for both themes', () => {
-    expect(css).toContain('--dsw-alias-label-primary: #0d2539')
-    expect(css).toContain('--dsw-alias-label-primary: #eff8fd')
-    expect(css).toContain('--dsw-alias-state-error-primary: #b54855')
-    expect(css).toContain('--dsw-alias-state-error-primary: #ff8f98')
+    expect(css).toContain('--dsw-alias-label-primary: #10283c')
+    expect(css).toContain('--dsw-alias-label-primary: #f1f9fd')
+    expect(css).toContain('--dsw-alias-state-error-primary: #b84c59')
+    expect(css).toContain('--dsw-alias-state-error-primary: #ff929b')
   })
 })

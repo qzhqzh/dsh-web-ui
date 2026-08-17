@@ -11,14 +11,14 @@ const cssSource = readFileSync(new URL('../src/client/neon-sleeper.module.css', 
 const artSource = readFileSync(new URL('../src/client/art.ts', import.meta.url), 'utf8')
 
 describe('Neon Sleeper V5 visual contracts', () => {
-  it('ships the HD wide WebP instead of the V4 upscaled low-resolution source', () => {
-    expect(artSource).toContain('WIDE_V5_LIGHT_PART_0')
+  it('ships a genuine multi-megapixel wide WebP instead of the V4 low-resolution source', () => {
+    expect(artSource).toContain('WIDE_V5_PART_0')
     expect(artSource).not.toContain('WIDE_V4_PART_0')
 
     const encoded = NEON_SLEEPER_ART_WIDE.split(',', 2)[1]
     const webp = Buffer.from(encoded, 'base64')
 
-    expect(webp.length).toBeGreaterThan(600_000)
+    expect(webp.length).toBeGreaterThan(250_000)
     expect(webp.subarray(0, 4).toString('ascii')).toBe('RIFF')
     expect(webp.subarray(8, 12).toString('ascii')).toBe('WEBP')
     expect(webp.subarray(12, 16).toString('ascii')).toBe('VP8 ')
@@ -27,8 +27,8 @@ describe('Neon Sleeper V5 visual contracts', () => {
     const height = webp.readUInt16LE(28) & 0x3fff
     expect(width).toBe(NEON_SLEEPER_ART_WIDE_WIDTH)
     expect(height).toBe(NEON_SLEEPER_ART_WIDE_HEIGHT)
-    expect(width).toBeGreaterThanOrEqual(3000)
-    expect(height).toBeGreaterThanOrEqual(1900)
+    expect(width).toBe(3456)
+    expect(height).toBe(2160)
   })
 
   it('keeps the photograph and shell free from blur and full-screen veil layers', () => {

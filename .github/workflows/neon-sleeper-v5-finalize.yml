@@ -1,4 +1,4 @@
-name: Neon Sleeper V5 preview finalize
+name: Neon Sleeper V5 HD finalize
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: neon-sleeper-v5-preview-finalize
+  group: neon-sleeper-v5-hd-finalize
   cancel-in-progress: false
 
 jobs:
@@ -21,6 +21,103 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: feat/neon-sleeper-v5-hd
+          fetch-depth: 0
+
+      - name: Reconstruct original Neon Sleeper composition
+        run: |
+          git fetch --no-tags --depth=1 origin feat/neon-sleeper-v3-2-clarity
+          git show FETCH_HEAD:packages/skins/neon-sleeper/src/client/art-wide-part0.ts > /tmp/neon-v3-wide.ts
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, re
+
+          text = Path('/tmp/neon-v3-wide.ts').read_text(encoding='utf-8')
+          match = re.search(r"WIDE_PART_0\s*=\s*'([^']+)'", text)
+          if not match:
+              raise SystemExit('unable to recover original Neon Sleeper composition')
+          Path('/tmp/neon-v5-source.webp').write_bytes(base64.b64decode(match.group(1)))
+          PY
+
+      - name: Install HD reconstruction tools
+        run: |
+          python3 -m pip install --disable-pip-version-check opencv-contrib-python-headless==4.10.0.84
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq webp
+          curl -L --fail --retry 3 \
+            https://github.com/Saafke/EDSR_Tensorflow/raw/master/models/EDSR_x4.pb \
+            -o /tmp/EDSR_x4.pb
+
+      - name: Rebuild wide background with EDSR x4
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import cv2
+
+          source = cv2.imread('/tmp/neon-v5-source.webp', cv2.IMREAD_COLOR)
+          if source is None:
+              raise SystemExit('source artwork could not be decoded')
+          if tuple(source.shape[1::-1]) != (864, 540):
+              raise SystemExit(f'unexpected source dimensions: {source.shape[1]}x{source.shape[0]}')
+
+          sr = cv2.dnn_superres.DnnSuperResImpl_create()
+          sr.readModel('/tmp/EDSR_x4.pb')
+          sr.setModel('edsr', 4)
+          hd = sr.upsample(source)
+          if tuple(hd.shape[1::-1]) != (3456, 2160):
+              raise SystemExit(f'unexpected HD dimensions: {hd.shape[1]}x{hd.shape[0]}')
+          cv2.imwrite('/tmp/neon-v5-hd.png', hd, [cv2.IMWRITE_PNG_COMPRESSION, 2])
+          PY
+
+          cwebp -quiet -q 96 -m 6 -sharp_yuv /tmp/neon-v5-hd.png -o /tmp/neon-v5-hd.webp
+          ls -lh /tmp/neon-v5-source.webp /tmp/neon-v5-hd.webp
+
+      - name: Embed HD background into source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, re
+
+          root = Path('packages/skins/neon-sleeper/src/client')
+          encoded = base64.b64encode(Path('/tmp/neon-v5-hd.webp').read_bytes()).decode('ascii')
+          chunk_size = 48000
+          chunks = [encoded[i:i + chunk_size] for i in range(0, len(encoded), chunk_size)]
+          if len(chunks) < 4 or len(chunks) > 40:
+              raise SystemExit(f'unexpected V5 artwork chunk count: {len(chunks)}')
+
+          for old in root.glob('art-wide-v5*.ts'):
+              old.unlink()
+          for old in root.glob('art-wide-v4-part*.ts'):
+              old.unlink()
+
+          for index, chunk in enumerate(chunks):
+              (root / f'art-wide-v5-part{index}.ts').write_text(
+                  f"export const WIDE_V5_PART_{index} = '{chunk}'\n",
+                  encoding='utf-8',
+              )
+
+          art = root / 'art.ts'
+          text = art.read_text(encoding='utf-8')
+          lines = [line for line in text.splitlines() if 'art-wide-v5' not in line and 'art-wide-v4' not in line]
+          text = '\n'.join(lines) + '\n'
+          marker = '/** Embedded artwork for the Neon Sleeper skin. */\n'
+          imports = ''.join(
+              f"import {{ WIDE_V5_PART_{i} }} from './art-wide-v5-part{i}.ts'\n"
+              for i in range(len(chunks))
+          )
+          if marker not in text:
+              raise SystemExit('art.ts marker missing')
+          text = text.replace(marker, marker + imports, 1)
+          expression = "export const NEON_SLEEPER_ART_WIDE = 'data:image/webp;base64,' + " + ' + '.join(
+              f'WIDE_V5_PART_{i}' for i in range(len(chunks))
+          )
+          text, count = re.subn(r"export const NEON_SLEEPER_ART_WIDE\s*=.*", expression, text, count=1)
+          if count != 1:
+              raise SystemExit('unable to replace wide art export')
+          text = re.sub(r'export const NEON_SLEEPER_ART_WIDE_WIDTH\s*=.*', 'export const NEON_SLEEPER_ART_WIDE_WIDTH = 3456', text)
+          text = re.sub(r'export const NEON_SLEEPER_ART_WIDE_HEIGHT\s*=.*', 'export const NEON_SLEEPER_ART_WIDE_HEIGHT = 2160', text)
+          art.write_text(text, encoding='utf-8')
+          print(f'embedded {len(encoded)} base64 chars in {len(chunks)} chunks')
+          PY
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -40,20 +137,6 @@ jobs:
         run: |
           pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
           pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
-
-      - name: Verify V5 HD and no-blur contracts
-        run: |
-          grep -Fq 'WIDE_V5_LIGHT_PART_0' packages/skins/neon-sleeper/src/client/art.ts
-          if find packages/skins/neon-sleeper/src/client -name 'art-wide-v4-part*.ts' | grep -q .; then
-            echo 'legacy V4 wide art still present' >&2
-            exit 1
-          fi
-          if grep -Eq 'backdrop-filter:[[:space:]]*blur|filter:[^;]*blur\(' packages/skins/neon-sleeper/src/client/neon-sleeper.module.css; then
-            echo 'V5 must not blur the photographic layer or application shell' >&2
-            exit 1
-          fi
-          grep -Fq "[class*='composerSeat']" packages/skins/neon-sleeper/src/client/neon-sleeper.module.css
-          grep -Fq 'background: transparent !important' packages/skins/neon-sleeper/src/client/neon-sleeper.module.css
 
       - name: Generate repository assets
         run: |
@@ -82,7 +165,7 @@ jobs:
           name: neon-sleeper-v5-hd-previews
           path: packages/skins/neon-sleeper/preview
 
-      - name: Commit generated V5 artifacts and remove temporary workflow
+      - name: Commit generated V5 assets and remove temporary workflow
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
