@@ -1,4 +1,4 @@
-name: Neon Sleeper V4 sharp-art pass
+name: Neon Sleeper V4 repair and finalize
 
 on:
   push:
@@ -9,11 +9,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: neon-sleeper-v4-sharp-art
+  group: neon-sleeper-v4-repair
   cancel-in-progress: false
 
 jobs:
-  sharpen-build-preview:
+  repair-build-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -30,7 +30,8 @@ jobs:
           from pathlib import Path
           import base64, re
 
-          source = Path('packages/skins/neon-sleeper/src/client/art-wide-part0.ts').read_text()
+          root = Path('packages/skins/neon-sleeper/src/client')
+          source = (root / 'art-wide-part0.ts').read_text(encoding='utf-8')
           match = re.search(r"WIDE_PART_0\s*=\s*'([^']+)'", source)
           if not match:
               raise SystemExit('WIDE_PART_0 not found')
@@ -49,14 +50,14 @@ jobs:
 
           python3 - <<'PY'
           from pathlib import Path
-          import base64
+          import base64, re
 
           root = Path('packages/skins/neon-sleeper/src/client')
           encoded = base64.b64encode(Path('/tmp/neon-wide-v4.webp').read_bytes()).decode('ascii')
           chunk_size = 24000
           chunks = [encoded[i:i + chunk_size] for i in range(0, len(encoded), chunk_size)]
-          if len(chunks) > 16:
-              raise SystemExit(f'unexpectedly large sharpened artwork: {len(chunks)} chunks')
+          if len(chunks) < 2 or len(chunks) > 16:
+              raise SystemExit(f'unexpected sharpened artwork chunk count: {len(chunks)}')
 
           for old in root.glob('art-wide-v4-part*.ts'):
               old.unlink()
@@ -68,10 +69,8 @@ jobs:
 
           art = root / 'art.ts'
           text = art.read_text(encoding='utf-8')
-          # Replace any previous wide imports and the exported wide expression while
-          # leaving portrait/icon assets untouched.
           lines = [line for line in text.splitlines() if not (
-              "./art-wide-part" in line or "./art-wide-v4-part" in line
+              "./art-wide-part" in line or "./art-wide-v4-part" in line or "./art-wide-hq-part" in line
           )]
           text = '\n'.join(lines) + '\n'
           import_block = ''.join(
@@ -83,7 +82,6 @@ jobs:
               raise SystemExit('art.ts header marker missing')
           text = text.replace(marker, marker + import_block, 1)
 
-          import re
           wide_expr = "export const NEON_SLEEPER_ART_WIDE = 'data:image/webp;base64,' + " + ' + '.join(
               f'WIDE_V4_PART_{i}' for i in range(len(chunks))
           )
@@ -97,9 +95,10 @@ jobs:
               raise SystemExit(f'wide export replacement count={count}')
           art.write_text(text, encoding='utf-8')
 
-          old = root / 'art-wide-part0.ts'
-          if old.exists():
-              old.unlink()
+          for obsolete in ('art-wide-part0.ts', 'art-wide-hq-part0.ts'):
+              path = root / obsolete
+              if path.exists():
+                  path.unlink()
           print(f'embedded V4 wide art: {len(encoded)} base64 chars in {len(chunks)} chunks')
           PY
 
@@ -134,6 +133,11 @@ jobs:
             exit 1
           fi
           test "$(find packages/skins/neon-sleeper/src/client -name 'art-wide-v4-part*.ts' | wc -l)" -ge 2
+          grep -Fq 'WIDE_V4_PART_0' packages/skins/neon-sleeper/src/client/art.ts
+          if grep -Fq 'WIDE_PART_0' packages/skins/neon-sleeper/src/client/art.ts; then
+            echo 'legacy WIDE_PART_0 still referenced' >&2
+            exit 1
+          fi
 
       - name: Generate repository assets
         run: |
@@ -142,8 +146,16 @@ jobs:
           node scripts/gallery-build
           pnpm --filter @linxin666/dsh-skins build
 
+      - name: Verify aggregate bundle identity
+        run: |
+          grep -Fq '@linxin666/dsh-client-ui-skin-neon-sleeper' packages/dsh-skins/skins/neon-sleeper/lib/client.js
+          if grep -Fq '@linxin666/dsh-client-ui-skin-whale-song' packages/dsh-skins/skins/neon-sleeper/lib/client.js; then
+            echo 'aggregate Neon Sleeper bundle contains whale-song module id' >&2
+            exit 1
+          fi
+
       - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm dlx playwright@1.62.1 install --with-deps chromium
 
       - name: Capture V4 previews
         run: node scripts/capture-previews neon-sleeper --serve
@@ -159,14 +171,14 @@ jobs:
       - name: Upload V4 previews
         uses: actions/upload-artifact@v4
         with:
-          name: neon-sleeper-v4-sharp-previews
+          name: neon-sleeper-v4-repaired-previews
           path: packages/skins/neon-sleeper/preview
 
-      - name: Commit sharpened V4 assets
+      - name: Commit repaired V4 assets and remove temporary workflows
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git rm .github/workflows/neon-sleeper-v4-sharp-art.yml
+          git rm -f .github/workflows/neon-sleeper-v4-sharp-art.yml .github/workflows/neon-sleeper-v4-finalize.yml
           git add -A
-          git commit -m 'feat(skins): sharpen Neon Sleeper V4 artwork [skip ci]'
+          git commit -m 'feat(skins): finalize Neon Sleeper V4 sharp assets'
           git push origin HEAD:feat/neon-sleeper-v4-clean
