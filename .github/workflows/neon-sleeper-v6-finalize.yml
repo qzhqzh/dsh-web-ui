@@ -1,0 +1,725 @@
+name: Neon Sleeper V6 native artwork finalize
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v6-original-artwork
+
+permissions:
+  contents: write
+
+concurrency:
+  group: neon-sleeper-v6-original-artwork
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout clean V6 branch
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v6-original-artwork
+          fetch-depth: 0
+
+      - name: Restore the two user-supplied native-size artworks
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_COMMIT=5552dfee827596e204468658a43cea2a2dd3c98e
+          gh api "/repos/${GITHUB_REPOSITORY}/contents/.github/workflows/neon-sleeper-v5-direct-finalize.yml?ref=${SOURCE_COMMIT}" \
+            --jq '.content' | tr -d '\n' | base64 -d > /tmp/source-workflow.yml
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          source = Path('/tmp/source-workflow.yml').read_text(encoding='utf-8')
+          for theme in ('LIGHT', 'DARK'):
+              match = re.search(rf'{theme}_SHAS=\(\n(.*?)\n\s*\)', source, re.S)
+              if match is None:
+                  raise SystemExit(f'{theme} chunk list not found')
+              shas = re.findall(r'\b[0-9a-f]{40}\b', match.group(1))
+              if not shas:
+                  raise SystemExit(f'{theme} chunk list is empty')
+              Path(f'/tmp/{theme.lower()}.shas').write_text('\n'.join(shas) + '\n', encoding='utf-8')
+              print(theme, len(shas), 'chunks')
+          PY
+
+          fetch_theme() {
+            local theme="$1"
+            : > "/tmp/${theme}.b64"
+            while IFS= read -r sha; do
+              gh api "/repos/${GITHUB_REPOSITORY}/git/blobs/${sha}" --jq '.content' \
+                | tr -d '\n' | base64 -d >> "/tmp/${theme}.b64"
+            done < "/tmp/${theme}.shas"
+            base64 -d "/tmp/${theme}.b64" > "/tmp/${theme}.webp"
+          }
+
+          fetch_theme light
+          fetch_theme dark
+
+          test "$(stat -c%s /tmp/light.webp)" -eq 111584
+          test "$(stat -c%s /tmp/dark.webp)" -eq 136968
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          for theme in ('light', 'dark'):
+              data = Path(f'/tmp/{theme}.webp').read_bytes()
+              assert data[:4] == b'RIFF'
+              assert data[8:12] == b'WEBP'
+              assert data[12:16] == b'VP8 '
+              width = int.from_bytes(data[26:28], 'little') & 0x3fff
+              height = int.from_bytes(data[28:30], 'little') & 0x3fff
+              assert (width, height) == (1672, 941), (theme, width, height)
+              print(theme, len(data), width, height, hashlib.sha256(data).hexdigest())
+          PY
+
+      - name: Write V6 source, artwork modules, tests and documentation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import json
+          import re
+          import subprocess
+
+          package_root = Path('packages/skins/neon-sleeper')
+          client = package_root / 'src/client'
+
+          old_art = (client / 'art.ts').read_text(encoding='utf-8')
+          icon = re.search(r'^export const NEON_SLEEPER_ICON = (.+)$', old_art, re.M)
+          if icon is None:
+              raise SystemExit('favicon constant not found')
+
+          for pattern in ('art-wide-*.ts', 'art-portrait-*.ts', 'art-light-v6-part*.ts', 'art-dark-v6-part*.ts'):
+              for path in client.glob(pattern):
+                  path.unlink()
+
+          imports: list[str] = []
+          expressions: dict[str, str] = {}
+          for theme in ('light', 'dark'):
+              encoded = base64.b64encode(Path(f'/tmp/{theme}.webp').read_bytes()).decode('ascii')
+              chunks = [encoded[index:index + 60000] for index in range(0, len(encoded), 60000)]
+              names: list[str] = []
+              for index, chunk in enumerate(chunks):
+                  symbol = f'{theme.upper()}_V6_PART_{index}'
+                  names.append(symbol)
+                  module = client / f'art-{theme}-v6-part{index}.ts'
+                  module.write_text(f"export const {symbol} = '{chunk}'\n", encoding='utf-8')
+                  imports.append(f"import {{ {symbol} }} from './{module.name}'")
+              expressions[theme] = ' + '.join(names)
+
+          (client / 'art.ts').write_text(
+              '/** Neon Sleeper V6 artwork: two separate user-supplied 1672x941 originals, encoded once at native size. */\n'
+              + '\n'.join(imports)
+              + '\n\n'
+              + "export const NEON_SLEEPER_ART_LIGHT = 'data:image/webp;base64,' + " + expressions['light'] + '\n'
+              + "export const NEON_SLEEPER_ART_DARK = 'data:image/webp;base64,' + " + expressions['dark'] + '\n'
+              + 'export const NEON_SLEEPER_ART_WIDTH = 1672\n'
+              + 'export const NEON_SLEEPER_ART_HEIGHT = 941\n'
+              + 'export const NEON_SLEEPER_ART_LIGHT_BYTES = 111584\n'
+              + 'export const NEON_SLEEPER_ART_DARK_BYTES = 136968\n'
+              + f'export const NEON_SLEEPER_ICON = {icon.group(1)}\n',
+              encoding='utf-8',
+          )
+
+          (client / 'index.ts').write_text("""/**
+           * Neon Sleeper V6 - direct light/dark original artwork.
+           * Theme changes swap the source image; the skin never recolors or blurs it.
+           */
+          import type { Context } from '@deepseek-ai/cordis'
+          import {
+            NEON_SLEEPER_ART_DARK,
+            NEON_SLEEPER_ART_LIGHT,
+            NEON_SLEEPER_ICON,
+          } from './art.ts'
+          import './neon-sleeper.module.css'
+
+          const OWNED_PROPERTIES = [
+            'background-color',
+            '--neon-sleeper-art',
+          ] as const
+
+          export function apply(ctx: Context): void {
+            const body = document.body
+            const previous = new Map<string, string>()
+            for (const property of OWNED_PROPERTIES) {
+              previous.set(property, body.style.getPropertyValue(property))
+            }
+
+            body.dataset.dshNeonSleeper = ''
+
+            const updateTheme = (): void => {
+              const dark = body.dataset.dsDarkTheme !== undefined
+              const artwork = dark ? NEON_SLEEPER_ART_DARK : NEON_SLEEPER_ART_LIGHT
+              body.style.setProperty('--neon-sleeper-art', `url(${artwork})`)
+              body.style.setProperty('background-color', dark ? '#061426' : '#dce9f1')
+            }
+
+            updateTheme()
+
+            const observer = new MutationObserver(updateTheme)
+            observer.observe(body, {
+              attributes: true,
+              attributeFilter: ['data-ds-dark-theme'],
+            })
+
+            const favicon = document.createElement('link')
+            favicon.rel = 'icon'
+            favicon.type = 'image/png'
+            favicon.href = NEON_SLEEPER_ICON
+            favicon.dataset.neonSleeperIcon = ''
+            document.head.append(favicon)
+
+            ctx.effect(() => () => {
+              delete body.dataset.dshNeonSleeper
+              observer.disconnect()
+              for (const [property, value] of previous) {
+                body.style.setProperty(property, value)
+              }
+              favicon.remove()
+            }, 'ui-skin-neon-sleeper: v6 direct-original photography surface')
+          }
+          """.replace(/^          /gm, ''), encoding='utf-8')
+
+          (client / 'neon-sleeper.module.css').write_text("""/* Neon Sleeper V6 - native-size light/dark photography, no global veil or blur. */
+
+          body[data-dsh-neon-sleeper] {
+            position: relative;
+            isolation: isolate;
+            color: #10283c;
+            background-color: #dce9f1;
+            font-family: Inter, Geist, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+
+            --dsh-accent: #238bb8;
+            --dsw-alias-bg-base: rgba(231, 242, 248, 0.02);
+            --dsw-alias-bg-layer-1: rgba(241, 248, 252, 0.07);
+            --dsw-alias-bg-layer-2: rgba(232, 243, 249, 0.13);
+            --dsw-alias-bg-layer-3: rgba(223, 238, 247, 0.20);
+            --dsw-alias-bg-module-platform: rgba(238, 247, 251, 0.08);
+            --dsw-alias-bg-overlay: rgba(247, 251, 253, 0.96);
+            --dsw-alias-bg-multi-select: rgba(178, 220, 240, 0.54);
+            --dsw-alias-border-l1: rgba(31, 90, 126, 0.10);
+            --dsw-alias-border-l2: rgba(31, 90, 126, 0.17);
+            --dsw-alias-border-l3: rgba(31, 90, 126, 0.27);
+            --dsw-alias-border-l4: rgba(31, 90, 126, 0.40);
+            --dsw-alias-brand-primary: #238bb8;
+            --dsw-alias-brand-text: #15506e;
+            --dsw-alias-label-primary: #10283c;
+            --dsw-alias-label-secondary: #355d73;
+            --dsw-alias-label-tertiary: #648397;
+            --dsw-alias-label-caption: #587a8e;
+            --dsw-alias-label-primary-dimmed: #4c6f83;
+            --dsw-alias-interactive-bg-hover: rgba(35, 139, 184, 0.08);
+            --dsw-alias-interactive-bg-hover-accent: rgba(35, 139, 184, 0.14);
+            --dsw-alias-interactive-bg-active: rgba(35, 139, 184, 0.18);
+            --dsw-alias-button-primary-fill: #238bb8;
+            --dsw-alias-button-primary-hover: #329bc5;
+            --dsw-alias-button-elevated-fill: rgba(251, 253, 254, 0.90);
+            --dsw-alias-button-floating-fill: rgba(251, 253, 254, 0.92);
+            --dsw-alias-state-business-primary: #1f82ad;
+            --dsw-alias-state-error-primary: #b84c59;
+            --dsw-alias-state-error-secondary: #ca6570;
+            --dsw-alias-state-success-primary: #347d6c;
+            --dsw-alias-state-warn-primary: #9b6c36;
+
+            --dsw-specific-sidebar-fill: rgba(232, 243, 249, 0.84);
+            --dsw-specific-sidebar-nav-item-active: rgba(104, 188, 226, 0.27);
+            --dsw-specific-sidebar-nav-item-hover: rgba(104, 188, 226, 0.15);
+            --dsw-specific-sidebar-nav-item-active-accent: rgba(35, 139, 184, 0.31);
+            --dsw-specific-input-major: rgba(249, 252, 254, 0.82);
+            --dsw-specific-login-input: rgba(250, 253, 254, 0.90);
+            --dsw-specific-menu: rgba(248, 252, 254, 0.98);
+            --dsw-specific-selector: rgba(246, 250, 253, 0.96);
+            --dsw-specific-bubble: rgba(227, 241, 248, 0.66);
+            --dsw-specific-bubble-highlight: rgba(204, 230, 242, 0.73);
+
+            --aion-bg-base: rgba(232, 243, 249, 0.05);
+            --aion-bg-1: rgba(243, 249, 252, 0.10);
+            --aion-bg-2: rgba(231, 242, 248, 0.17);
+            --aion-bg-3: rgba(35, 139, 184, 0.10);
+            --aion-bg-4: rgba(35, 139, 184, 0.17);
+            --aion-bg-hover: rgba(35, 139, 184, 0.08);
+            --aion-bg-active: rgba(35, 139, 184, 0.13);
+            --aion-text-primary: #10283c;
+            --aion-text-secondary: #355d73;
+            --aion-text-tertiary: #648397;
+            --aion-primary: #238bb8;
+            --aion-border-base: rgba(31, 90, 126, 0.16);
+          }
+
+          body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+            color: #eff8fd;
+            background-color: #061426;
+
+            --dsh-accent: #80d1f5;
+            --dsw-alias-bg-base: rgba(3, 13, 29, 0.02);
+            --dsw-alias-bg-layer-1: rgba(5, 19, 40, 0.07);
+            --dsw-alias-bg-layer-2: rgba(7, 25, 50, 0.14);
+            --dsw-alias-bg-layer-3: rgba(10, 33, 62, 0.22);
+            --dsw-alias-bg-module-platform: rgba(5, 19, 40, 0.08);
+            --dsw-alias-bg-overlay: rgba(7, 24, 48, 0.97);
+            --dsw-alias-bg-multi-select: rgba(39, 93, 126, 0.58);
+            --dsw-alias-border-l1: rgba(128, 209, 245, 0.09);
+            --dsw-alias-border-l2: rgba(128, 209, 245, 0.17);
+            --dsw-alias-border-l3: rgba(128, 209, 245, 0.27);
+            --dsw-alias-border-l4: rgba(128, 209, 245, 0.40);
+            --dsw-alias-brand-primary: #80d1f5;
+            --dsw-alias-brand-text: #d7f1fc;
+            --dsw-alias-label-primary: #f1f9fd;
+            --dsw-alias-label-secondary: #cadde8;
+            --dsw-alias-label-tertiary: #95b3c3;
+            --dsw-alias-label-caption: #a2bdcc;
+            --dsw-alias-label-primary-dimmed: #b6ccd8;
+            --dsw-alias-interactive-bg-hover: rgba(128, 209, 245, 0.09);
+            --dsw-alias-interactive-bg-hover-accent: rgba(128, 209, 245, 0.14);
+            --dsw-alias-interactive-bg-active: rgba(128, 209, 245, 0.18);
+            --dsw-alias-button-primary-fill: #3c9dc9;
+            --dsw-alias-button-primary-hover: #51afd7;
+            --dsw-alias-button-elevated-fill: rgba(8, 29, 54, 0.87);
+            --dsw-alias-button-floating-fill: rgba(8, 29, 54, 0.89);
+            --dsw-alias-state-business-primary: #80d1f5;
+            --dsw-alias-state-error-primary: #ff929b;
+            --dsw-alias-state-error-secondary: #ffadb4;
+            --dsw-alias-state-success-primary: #7cc8af;
+            --dsw-alias-state-warn-primary: #efc78e;
+
+            --dsw-specific-sidebar-fill: rgba(4, 17, 37, 0.87);
+            --dsw-specific-sidebar-nav-item-active: rgba(47, 108, 145, 0.49);
+            --dsw-specific-sidebar-nav-item-hover: rgba(47, 108, 145, 0.29);
+            --dsw-specific-sidebar-nav-item-active-accent: rgba(128, 209, 245, 0.27);
+            --dsw-specific-input-major: rgba(4, 20, 43, 0.73);
+            --dsw-specific-login-input: rgba(4, 20, 43, 0.87);
+            --dsw-specific-menu: rgba(5, 20, 43, 0.98);
+            --dsw-specific-selector: rgba(7, 25, 50, 0.96);
+            --dsw-specific-bubble: rgba(18, 55, 88, 0.64);
+            --dsw-specific-bubble-highlight: rgba(35, 79, 112, 0.72);
+
+            --aion-bg-base: rgba(3, 15, 34, 0.06);
+            --aion-bg-1: rgba(5, 20, 43, 0.11);
+            --aion-bg-2: rgba(7, 25, 51, 0.18);
+            --aion-bg-3: rgba(128, 209, 245, 0.10);
+            --aion-bg-4: rgba(128, 209, 245, 0.17);
+            --aion-bg-hover: rgba(128, 209, 245, 0.08);
+            --aion-bg-active: rgba(128, 209, 245, 0.13);
+            --aion-text-primary: #f1f9fd;
+            --aion-text-secondary: #cadde8;
+            --aion-text-tertiary: #95b3c3;
+            --aion-primary: #80d1f5;
+            --aion-border-base: rgba(128, 209, 245, 0.16);
+          }
+
+          body[data-dsh-neon-sleeper]::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 1;
+            background-image: var(--neon-sleeper-art);
+            background-position: right center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            image-rendering: auto;
+          }
+
+          body[data-dsh-neon-sleeper] [id='root'] {
+            position: relative;
+            z-index: 1;
+            background: transparent;
+          }
+
+          body[data-dsh-neon-sleeper] [role='navigation'] {
+            background: linear-gradient(180deg, rgba(246, 251, 255, 0.93), rgba(224, 240, 248, 0.87)) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.66);
+            box-shadow: 12px 0 32px rgba(12, 49, 74, 0.10);
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+          }
+
+          body[data-dsh-neon-sleeper][data-ds-dark-theme] [role='navigation'] {
+            background: linear-gradient(180deg, rgba(5, 21, 44, 0.92), rgba(4, 16, 35, 0.88)) !important;
+            border-right-color: rgba(128, 209, 245, 0.14);
+            box-shadow: 12px 0 36px rgba(0, 5, 15, 0.34);
+          }
+
+          body[data-dsh-neon-sleeper] [role='navigation'] button,
+          body[data-dsh-neon-sleeper] [role='navigation'] [role='button'] {
+            border-radius: 10px;
+          }
+
+          body[data-dsh-neon-sleeper] [class*='composerSeat'],
+          body[data-dsh-neon-sleeper] [data-composer-seat],
+          body[data-dsh-neon-sleeper] [data-phase='active'] [class*='composerSeat'] {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+          }
+
+          body[data-dsh-neon-sleeper] [class*='composerSeat']::before,
+          body[data-dsh-neon-sleeper] [class*='composerSeat']::after,
+          body[data-dsh-neon-sleeper] [data-composer-seat]::before,
+          body[data-dsh-neon-sleeper] [data-composer-seat]::after {
+            content: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+          }
+
+          body[data-dsh-neon-sleeper] [data-composer],
+          body[data-dsh-neon-sleeper] [data-composer] * {
+            text-shadow: none;
+          }
+
+          body[data-dsh-neon-sleeper] a {
+            color: #176f9a;
+          }
+
+          body[data-dsh-neon-sleeper][data-ds-dark-theme] a {
+            color: #80d1f5;
+          }
+
+          body[data-dsh-neon-sleeper] :focus-visible {
+            outline: 2px solid var(--dsw-alias-state-business-primary);
+            outline-offset: 2px;
+          }
+
+          body[data-dsh-neon-sleeper]::selection {
+            color: #ffffff;
+            background: #238bb8;
+          }
+
+          body[data-dsh-neon-sleeper][data-ds-dark-theme]::selection {
+            color: #061426;
+            background: #80d1f5;
+          }
+
+          @media (max-aspect-ratio: 4 / 5) {
+            body[data-dsh-neon-sleeper]::before {
+              background-position: 82% center;
+            }
+
+            body[data-dsh-neon-sleeper] {
+              --dsw-specific-sidebar-fill: rgba(232, 243, 249, 0.92);
+              --dsw-specific-input-major: rgba(249, 252, 254, 0.87);
+            }
+
+            body[data-dsh-neon-sleeper][data-ds-dark-theme] {
+              --dsw-specific-sidebar-fill: rgba(4, 17, 37, 0.92);
+              --dsw-specific-input-major: rgba(4, 20, 43, 0.80);
+            }
+          }
+          """.replace(/^          /gm, ''), encoding='utf-8')
+
+          tests = package_root / 'tests'
+          for stale in ('v4-art.spec.ts', 'v5-art.spec.ts'):
+              path = tests / stale
+              if path.exists():
+                  path.unlink()
+
+          (tests / 'v6-art.spec.ts').write_text("""import { Buffer } from 'node:buffer'
+          import { readFileSync } from 'node:fs'
+          import { describe, expect, it } from 'vitest'
+          import {
+            NEON_SLEEPER_ART_DARK,
+            NEON_SLEEPER_ART_DARK_BYTES,
+            NEON_SLEEPER_ART_HEIGHT,
+            NEON_SLEEPER_ART_LIGHT,
+            NEON_SLEEPER_ART_LIGHT_BYTES,
+            NEON_SLEEPER_ART_WIDTH,
+          } from '../src/client/art.ts'
+
+          const css = readFileSync(new URL('../src/client/neon-sleeper.module.css', import.meta.url), 'utf8')
+
+          function inspect(dataUrl: string, expectedBytes: number): [number, number] {
+            const payload = Buffer.from(dataUrl.split(',', 2)[1], 'base64')
+            expect(payload.length).toBe(expectedBytes)
+            expect(payload.subarray(0, 4).toString('ascii')).toBe('RIFF')
+            expect(payload.subarray(8, 12).toString('ascii')).toBe('WEBP')
+            expect(payload.subarray(12, 16).toString('ascii')).toBe('VP8 ')
+            return [payload.readUInt16LE(26) & 0x3fff, payload.readUInt16LE(28) & 0x3fff]
+          }
+
+          describe('Neon Sleeper V6 native artwork contract', () => {
+            it('ships distinct native-size light and dark images without fake upscaling', () => {
+              expect(NEON_SLEEPER_ART_LIGHT).not.toBe(NEON_SLEEPER_ART_DARK)
+              expect(inspect(NEON_SLEEPER_ART_LIGHT, NEON_SLEEPER_ART_LIGHT_BYTES)).toEqual([1672, 941])
+              expect(inspect(NEON_SLEEPER_ART_DARK, NEON_SLEEPER_ART_DARK_BYTES)).toEqual([1672, 941])
+              expect(NEON_SLEEPER_ART_WIDTH).toBe(1672)
+              expect(NEON_SLEEPER_ART_HEIGHT).toBe(941)
+            })
+
+            it('does not blur, scale, recolor, or veil the supplied photography', () => {
+              expect(css).toContain('background-image: var(--neon-sleeper-art)')
+              expect(css).toContain('opacity: 1')
+              expect(css).not.toMatch(/filter:[^;]*blur\(/i)
+              expect(css).not.toMatch(/body\[data-dsh-neon-sleeper\]\[data-ds-dark-theme\]::before\s*\{[^}]*filter:/s)
+              expect(css).not.toContain('transform: scale(')
+              expect(css).not.toContain('body[data-dsh-neon-sleeper]::after')
+            })
+          })
+          """.replace(/^          /gm, ''), encoding='utf-8')
+
+          (tests / 'apply.spec.ts').write_text("""// @vitest-environment jsdom
+          import { afterEach, describe, expect, it } from 'vitest'
+          import { Context, type Fiber } from '@deepseek-ai/cordis'
+          import { apply } from '../src/client/index.ts'
+
+          let fiber: Fiber | undefined
+
+          async function mount(): Promise<Fiber> {
+            const next = new Context().plugin({ apply })
+            await next.await()
+            return next
+          }
+
+          async function tick(): Promise<void> {
+            await new Promise((resolve) => { setTimeout(resolve, 0) })
+          }
+
+          afterEach(async () => {
+            await fiber?.dispose()
+            fiber = undefined
+            document.head.querySelectorAll('link[data-neon-sleeper-icon]').forEach((node) => { node.remove() })
+            delete document.body.dataset.dshNeonSleeper
+            delete document.body.dataset.dsDarkTheme
+            document.body.style.cssText = ''
+          })
+
+          describe('neon-sleeper V6 apply', () => {
+            it('mounts the light artwork and favicon', async () => {
+              fiber = await mount()
+              expect(document.body.dataset.dshNeonSleeper).toBe('')
+              expect(document.body.style.getPropertyValue('--neon-sleeper-art')).toContain('data:image/webp;base64')
+              expect(document.head.querySelector('link[data-neon-sleeper-icon]')).not.toBeNull()
+            })
+
+            it('switches to the independent dark artwork without remounting', async () => {
+              fiber = await mount()
+              const light = document.body.style.getPropertyValue('--neon-sleeper-art')
+              document.body.dataset.dsDarkTheme = ''
+              await tick()
+              const dark = document.body.style.getPropertyValue('--neon-sleeper-art')
+              expect(dark).not.toBe(light)
+              expect(document.body.style.getPropertyValue('background-color')).toBe('rgb(6, 20, 38)')
+            })
+
+            it('restores all inline state on dispose', async () => {
+              document.body.style.setProperty('background-color', 'rgb(1, 2, 3)')
+              document.body.style.setProperty('--neon-sleeper-art', 'prior-art')
+              fiber = await mount()
+              await fiber.dispose()
+              fiber = undefined
+              expect(document.body.dataset.dshNeonSleeper).toBeUndefined()
+              expect(document.body.style.getPropertyValue('background-color')).toBe('rgb(1, 2, 3)')
+              expect(document.body.style.getPropertyValue('--neon-sleeper-art')).toBe('prior-art')
+              expect(document.head.querySelector('link[data-neon-sleeper-icon]')).toBeNull()
+            })
+          })
+          """.replace(/^          /gm, ''), encoding='utf-8')
+
+          (tests / 'css-contract.spec.ts').write_text("""import { readFileSync } from 'node:fs'
+          import { describe, expect, it } from 'vitest'
+
+          const css = readFileSync(new URL('../src/client/neon-sleeper.module.css', import.meta.url), 'utf8')
+
+          describe('Neon Sleeper V6 CSS contract', () => {
+            it('keeps navigation usable without shell-level blur', () => {
+              expect(css).toContain("[role='navigation']")
+              expect(css).toContain('backdrop-filter: none !important')
+              expect(css).not.toMatch(/backdrop-filter:\s*blur/i)
+            })
+
+            it('keeps every composer seat transparent', () => {
+              expect(css).toContain("[class*='composerSeat']")
+              expect(css).toContain('[data-composer-seat]')
+              expect(css).toContain('background: transparent !important')
+              expect(css).toContain('content: none !important')
+            })
+
+            it('defines readable semantic text and error colors for both themes', () => {
+              expect(css).toContain('--dsw-alias-label-primary: #10283c')
+              expect(css).toContain('--dsw-alias-label-primary: #f1f9fd')
+              expect(css).toContain('--dsw-alias-state-error-primary: #b84c59')
+              expect(css).toContain('--dsw-alias-state-error-primary: #ff929b')
+            })
+          })
+          """.replace(/^          /gm, ''), encoding='utf-8')
+
+          readme_en = """# Neon Sleeper
+
+          English | [中文](README.zh.md)
+
+          Neon Sleeper is a photography-first skin for the DSH Web UI. V6 uses two separate user-supplied artworks: a bright daytime future cabin for light mode and a quiet night-city sleeper cabin for dark mode.
+
+          ## Design direction
+
+          V6 removes the fake-HD pipeline entirely. Each 1672×941 source image is encoded once at its native dimensions and selected directly by the host theme. The application never enlarges a low-resolution intermediate, recolors the dark image, blurs the photograph, or adds a full-screen milky veil.
+
+          - Independent 1672×941 light and dark artwork supplied by the user.
+          - One native-size WebP encode per source; no EDSR or synthetic super-resolution.
+          - No global blur, image scaling transform, dark-mode color filter, or full-screen scrim.
+          - Clear blue-white light navigation and restrained deep-blue dark navigation.
+          - Transparent composer layout wrappers, preventing a second full-width bar behind the real input.
+          - Runtime theme switching through one observed body attribute, with no resize listener or network request.
+
+          ## Install
+
+          ```bash
+          dsh-skin install neon-sleeper
+          dsh-skin use neon-sleeper
+          ```
+
+          The current `scripts/dsh-skin` registry discovers the skin from `skin.json`, so no manual registry entry is required.
+
+          ## Development
+
+          ```bash
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+          ```
+
+          ## Visual contract
+
+          Both theme artworks must remain 1672×941, use independent embedded payloads, and render at opacity 1 without global blur, theme recoloring, fractional transforms, or a body-level veil. Navigation ancestors must remain blur-free so fixed submenus retain their native positioning. Composer seats must remain transparent.
+
+          ## License
+
+          BSD-3-Clause.
+          """.replace(/^          /gm, '')
+
+          readme_zh = """# 夜航舱
+
+          [English](README.md) | 中文
+
+          夜航舱是一套以摄影画面为主体的 DSH Web UI 皮肤。V6 为亮色和暗色模式分别使用用户提供的独立原图：亮色是清透的白昼未来都市舱，暗色是安静的深夜磁悬浮卧铺舱。
+
+          ## 设计方向
+
+          V6 完全删除伪高清处理链。两张 1672×941 原图都只在原始尺寸下编码一次，并由宿主主题直接选择；不再把低清中间图放大，不对暗色图片二次调色，不模糊摄影层，也不覆盖整屏乳白或蓝灰蒙版。
+
+          - 用户提供的亮色与暗色 1672×941 独立原图。
+          - 每张原图只做一次原始尺寸 WebP 编码，不使用 EDSR 或合成超分辨率。
+          - 不使用全局模糊、图片缩放变换、暗色滤镜或整屏遮罩。
+          - 亮色侧边栏采用清透蓝白层级，暗色侧边栏采用克制深蓝层级。
+          - composer 布局外层保持透明，避免真正输入框后再次出现横向色块。
+          - 运行时只监听主题属性，不监听窗口尺寸，也不请求外部图片。
+
+          ## 安装
+
+          ```bash
+          dsh-skin install neon-sleeper
+          dsh-skin use neon-sleeper
+          ```
+
+          当前 `scripts/dsh-skin` 会根据 `skin.json` 自动发现皮肤，不需要手工维护注册表。
+
+          ## 开发
+
+          ```bash
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+          ```
+
+          ## 视觉契约
+
+          亮暗两张主题背景必须保持 1672×941，使用互相独立的内嵌资源，并以 opacity 1 渲染；不得加入全局模糊、主题二次调色、分数缩放或 body 级雾化层。导航祖先节点必须保持无模糊，确保固定定位的二级菜单不改变坐标系；composer seat 必须透明。
+
+          ## 许可证
+
+          BSD-3-Clause。
+          """.replace(/^          /gm, '')
+
+          (package_root / 'README.md').write_text(readme_en, encoding='utf-8')
+          (package_root / 'README.zh.md').write_text(readme_zh, encoding='utf-8')
+
+          en_hash = subprocess.check_output(['git', 'hash-object', str(package_root / 'README.md')], text=True).strip()
+          zh_hash = subprocess.check_output(['git', 'hash-object', str(package_root / 'README.zh.md')], text=True).strip()
+          (package_root / 'README.i18n.yaml').write_text(
+              '# Bilingual-pair consistency record (docs/i18n.md): the git blob hash of each\n'
+              '# side as of the last confirmed-consistent state. Both languages carry equal authority;\n'
+              '# after editing either side, bring the other along and re-record with:\n'
+              '#   node scripts/verify-docs.mjs --write <dir>\n'
+              f'README.md: {en_hash}\nREADME.zh.md: {zh_hash}\n',
+              encoding='utf-8',
+          )
+
+          package_path = package_root / 'package.json'
+          package = json.loads(package_path.read_text(encoding='utf-8'))
+          package['version'] = '0.1.21'
+          package['description'] = 'Photography-first Neon Sleeper V6 with separate native-size light and dark artwork, no fake-HD upscaling, blur, recoloring or full-screen veil'
+          package_path.write_text(json.dumps(package, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          skin_path = package_root / 'skin.json'
+          skin = json.loads(skin_path.read_text(encoding='utf-8'))
+          skin['tagline'] = '原生亮暗双图 · 清透未来舱 · 无伪高清模糊'
+          skin['description'] = '《夜航舱》V6：亮色和暗色分别直接使用用户提供的 1672×941 原图，只在原始尺寸下编码一次；不再使用低清中间图超分放大，不对暗色图二次滤镜，不叠整屏雾化蒙版。侧边栏采用清透蓝白/深蓝双主题，composer 外层保持透明。'
+          skin['tags'] = ['future-life', 'maglev', 'photography', 'native-artwork', 'light-dark', 'minimal']
+          skin_path.write_text(json.dumps(skin, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build and test Neon Sleeper V6
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+
+      - name: Regenerate repository bundles
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+
+      - name: Install Chromium
+        run: pnpm dlx playwright@1.62.1 install --with-deps chromium
+
+      - name: Capture light and dark previews
+        run: node scripts/capture-previews neon-sleeper --serve
+
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+          pnpm no-emoji
+
+      - name: Upload preview evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v6-original-artwork-previews
+          path: packages/skins/neon-sleeper/preview
+
+      - name: Commit clean V6 state and remove one-shot workflow
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/neon-sleeper-v6-finalize.yml
+          git add -A
+          git commit -m 'feat(skins): deliver Neon Sleeper V6 native artwork'
+          git push origin HEAD:feat/neon-sleeper-v6-original-artwork
