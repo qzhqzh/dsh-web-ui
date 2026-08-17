@@ -1,0 +1,112 @@
+name: Neon Sleeper V5 direct originals
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v5-hd
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v5-hd
+          fetch-depth: 0
+      - name: Decode direct original artwork
+        env:
+          LIGHT_ART_B64: ${{ secrets.NEON_SLEEPER_V5_LIGHT_B64 }}
+          DARK_ART_B64: ${{ secrets.NEON_SLEEPER_V5_DARK_B64 }}
+        run: |
+          test -n "$LIGHT_ART_B64"
+          test -n "$DARK_ART_B64"
+          printf '%s' "$LIGHT_ART_B64" | base64 -d > /tmp/light.webp
+          printf '%s' "$DARK_ART_B64" | base64 -d > /tmp/dark.webp
+      - name: Generate theme-specific embedded art
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, re
+          root = Path('packages/skins/neon-sleeper/src/client')
+          for old in root.glob('art-wide-v5-part*.ts'):
+              old.unlink()
+          for old in root.glob('art-portrait-part*.ts'):
+              old.unlink()
+          def emit(prefix, path):
+              encoded = base64.b64encode(Path(path).read_bytes()).decode('ascii')
+              chunks = [encoded[i:i+60000] for i in range(0, len(encoded), 60000)]
+              for i, chunk in enumerate(chunks):
+                  (root / f'art-{prefix}-v5-part{i}.ts').write_text(
+                      f"export const {prefix.upper()}_V5_PART_{i} = '{chunk}'\n", encoding='utf-8')
+              return len(chunks)
+          light_n = emit('light', '/tmp/light.webp')
+          dark_n = emit('dark', '/tmp/dark.webp')
+          imports = ''.join(f"import {{ LIGHT_V5_PART_{i} }} from './art-light-v5-part{i}.ts'\n" for i in range(light_n))
+          imports += ''.join(f"import {{ DARK_V5_PART_{i} }} from './art-dark-v5-part{i}.ts'\n" for i in range(dark_n))
+          icon = re.search(r"export const NEON_SLEEPER_ICON = (.+)$", (root/'art.ts').read_text(), re.M).group(1)
+          light_expr = ' + '.join(f'LIGHT_V5_PART_{i}' for i in range(light_n))
+          dark_expr = ' + '.join(f'DARK_V5_PART_{i}' for i in range(dark_n))
+          (root/'art.ts').write_text(
+              '/** Embedded artwork for the Neon Sleeper skin. */\n' + imports + '\n' +
+              "export const NEON_SLEEPER_ART_LIGHT = 'data:image/webp;base64,' + " + light_expr + '\n' +
+              "export const NEON_SLEEPER_ART_DARK = 'data:image/webp;base64,' + " + dark_expr + '\n' +
+              'export const NEON_SLEEPER_ART_WIDTH = 1672\nexport const NEON_SLEEPER_ART_HEIGHT = 941\n' +
+              'export const NEON_SLEEPER_ICON = ' + icon + '\n', encoding='utf-8')
+          PY
+      - name: Patch theme switching and visual contracts
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('packages/skins/neon-sleeper/src/client/index.ts')
+          s=p.read_text()
+          s=s.replace('NEON_SLEEPER_ART_PORTRAIT,\n  NEON_SLEEPER_ART_WIDE,', 'NEON_SLEEPER_ART_DARK,\n  NEON_SLEEPER_ART_LIGHT,')
+          s=s.replace("function usesPortraitArt(): boolean {\n  return window.innerWidth / Math.max(window.innerHeight, 1) < 0.84\n}\n\n", '')
+          s=s.replace('`url(${usesPortraitArt() ? NEON_SLEEPER_ART_PORTRAIT : NEON_SLEEPER_ART_WIDE})`', '`url(${dark ? NEON_SLEEPER_ART_DARK : NEON_SLEEPER_ART_LIGHT})`')
+          p.write_text(s)
+          css=Path('packages/skins/neon-sleeper/src/client/neon-sleeper.module.css')
+          c=css.read_text()
+          c=re.sub(r"\nbody\[data-dsh-neon-sleeper\]\[data-ds-dark-theme\]::before \{\n  filter:[^}]+\}\n", '\n', c)
+          css.write_text(c)
+          test=Path('packages/skins/neon-sleeper/tests/v5-art.spec.ts')
+          test.write_text("""import { Buffer } from 'node:buffer'\nimport { describe, expect, it } from 'vitest'\nimport { NEON_SLEEPER_ART_DARK, NEON_SLEEPER_ART_HEIGHT, NEON_SLEEPER_ART_LIGHT, NEON_SLEEPER_ART_WIDTH } from '../src/client/art.ts'\n\nfunction webpSize(dataUrl: string): [number, number] {\n  const webp = Buffer.from(dataUrl.split(',', 2)[1], 'base64')\n  expect(webp.length).toBeGreaterThan(200_000)\n  expect(webp.subarray(0, 4).toString('ascii')).toBe('RIFF')\n  expect(webp.subarray(8, 12).toString('ascii')).toBe('WEBP')\n  expect(webp.subarray(12, 16).toString('ascii')).toBe('VP8 ')\n  return [webp.readUInt16LE(26) & 0x3fff, webp.readUInt16LE(28) & 0x3fff]\n}\n\ndescribe('Neon Sleeper V5 direct-original visual contracts', () => {\n  it('ships separate real light and dark originals without fake upscaling', () => {\n    expect(NEON_SLEEPER_ART_LIGHT).not.toBe(NEON_SLEEPER_ART_DARK)\n    expect(webpSize(NEON_SLEEPER_ART_LIGHT)).toEqual([1672, 941])\n    expect(webpSize(NEON_SLEEPER_ART_DARK)).toEqual([1672, 941])\n    expect(NEON_SLEEPER_ART_WIDTH).toBe(1672)\n    expect(NEON_SLEEPER_ART_HEIGHT).toBe(941)\n  })\n})\n""")
+          PY
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 11
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+      - run: pnpm dlx playwright@1.62.1 install --with-deps chromium
+      - run: node scripts/capture-previews neon-sleeper --serve
+      - run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v5-direct-original-previews
+          path: packages/skins/neon-sleeper/preview
+      - name: Commit direct-original V5 state
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm -f .github/workflows/neon-sleeper-v5-direct-originals.yml
+          git add -A
+          git commit -m 'fix(skins): use direct Neon Sleeper light and dark originals'
+          git push origin HEAD:feat/neon-sleeper-v5-hd
