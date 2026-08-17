@@ -26,7 +26,7 @@ afterEach(async () => {
   Object.defineProperty(window, 'innerHeight', { configurable: true, value: 768 })
 })
 
-describe('neon-sleeper V4 apply', () => {
+describe('neon-sleeper V5 apply', () => {
   it('mounts the responsive photo and favicon', async () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1440 })
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 900 })
