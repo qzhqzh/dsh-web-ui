@@ -1,0 +1,103 @@
+name: Neon Sleeper V4 finalize
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v4-clean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: neon-sleeper-v4-finalize
+  cancel-in-progress: false
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v4-clean
+
+      - name: Remove abandoned V4 experiment
+        run: rm -f packages/skins/neon-sleeper/src/client/art-wide-hq-part0.ts
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
+
+      - name: Build and test Neon Sleeper
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+
+      - name: Verify V4 bundle identity and clarity contracts
+        run: |
+          grep -Fq '@linxin666/dsh-client-ui-skin-neon-sleeper' packages/skins/neon-sleeper/lib/client.js
+          if grep -Fq '@linxin666/dsh-client-ui-skin-whale-song' packages/skins/neon-sleeper/lib/client.js; then
+            echo 'Neon Sleeper bundle still contains whale-song module id' >&2
+            exit 1
+          fi
+          if grep -Eq 'backdrop-filter:[[:space:]]*blur|filter:[^;]*blur\(' packages/skins/neon-sleeper/src/client/neon-sleeper.module.css; then
+            echo 'V4 must not blur the photographic background or shell' >&2
+            exit 1
+          fi
+          grep -Fq "[class*='composerSeat']" packages/skins/neon-sleeper/src/client/neon-sleeper.module.css
+          grep -Fq 'background: transparent !important' packages/skins/neon-sleeper/src/client/neon-sleeper.module.css
+
+      - name: Generate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+
+      - name: Verify aggregate bundle identity
+        run: |
+          grep -Fq '@linxin666/dsh-client-ui-skin-neon-sleeper' packages/dsh-skins/skins/neon-sleeper/lib/client.js
+          if grep -Fq '@linxin666/dsh-client-ui-skin-whale-song' packages/dsh-skins/skins/neon-sleeper/lib/client.js; then
+            echo 'Aggregate Neon Sleeper bundle contains whale-song module id' >&2
+            exit 1
+          fi
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Capture V4 previews
+        run: node scripts/capture-previews neon-sleeper --serve
+
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+
+      - name: Upload V4 previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v4-final-previews
+          path: packages/skins/neon-sleeper/preview
+
+      - name: Commit V4 generated artifacts
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/neon-sleeper-v4-finalize.yml
+          git add -A
+          git commit -m 'chore(skins): finalize Neon Sleeper V4 artifacts [skip ci]'
+          git push origin HEAD:feat/neon-sleeper-v4-clean
