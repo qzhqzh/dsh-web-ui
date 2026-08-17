@@ -1,0 +1,200 @@
+name: Neon Sleeper V5 direct original finalize
+
+on:
+  push:
+    branches:
+      - feat/neon-sleeper-v5-hd
+
+permissions:
+  contents: write
+
+concurrency:
+  group: neon-sleeper-v5-direct-finalize
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: feat/neon-sleeper-v5-hd
+          fetch-depth: 0
+
+      - name: Reconstruct direct user originals from Git blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIGHT_SHAS=(
+            d00e79bb9562c46ee689a1d3ca1007e989afd1ed 2b019befd7f9a254e41573545f1321cf3e200035 457a2ae9163516fd333b16941249ccff927520bc d1d3e12c50bcecdb92e5c09888bf9b674958a6f5 c15a526f6c7b6c4e9f6c5d8a7d33129538703f62 7d81b4454bfa5fd9ad15d59b7dd202bda7f078ba 19bdac8c71af3f3ea2099f12956003e68772c883 cf68567778966a812b6f65bcea80182908214c55 6ff5b35dc6bf2838f44ab8f30e18cda6a4f2f0b6 0e76d3bd70ea443bef530b3376515ec60d5fec4c 5b146130dbed120ba71a9744783cf30b8efc1d11 90e78312e8b2ffb1c90b3b426579cd5922800e7a d9f16b692382066ec61201a88bc240ff3a5a11a6 1b2473bb960aa8c640d84726173a28e27c346ee6 fad58d9ffa765d994cbfab2684d9953467bd2d49 131de1cd24d38b31b132a260ddd91237fcc4d4e6 ff4b3426348e76bc2c6080541e486fa4882e58b9 249982a4483a46ce495be509e4569437c8b59ec2 ac2807ed85dd2677642e0d9aef560b52569932ed 97af7c1603caf44ad2d63ea79bb719177a0840af 67b16d67073423dbe2db60e756d73a2e9bb17fda 56ede4546bdcb1f6cd9a68c3389968d54d64804a 6dc0ad33b19d57fed3e462e7f41812e79fb6aa4f 7cb745835f8116a9794d46f3dbb5ab5240379711 8fef94d77826f7ea5cc9d1f445e1a8abdf5ff212 d7a7dbe5c5ddd610c8c7922a21fc3fa6a10b86b2 ba200b8b3a59c3fd25d28bd40d08364c82283966 826cf0cd1aa8fc579ba8c004c464043b8341f140 76a4248a33244678710ee3a95e4e86f29c061113 937ee42ab6e2e6808f3429d9133ba8a9edd1707b
+          )
+          DARK_SHAS=(
+            8d3af8d878e534e1d07e7f735de40050d24d262e 2b7dc81159e3ed26f5f252b8fa8d5997be2d093d 7631bb6a52e0c0d2b6b89f96228d63ed616d2c48 af04c5507a1ac4b2b03c75c529d9e6b89d205d53 7ea617934d113148b260a443a7f18f0fa49f9dd8 d89a0b08c97ab00ffed07df727f39f479454d76f 13e173924f4e772f82bcb87717c03a2ee036c900 ba285a0520a5aaffc867667799d71fd1aa4c3730 b389881e5695d6608ec8fc8497975a083a2ca818 38c2a916852d4db20ffe30a3d6f6c148b80b9e2b 381b97a48b5bf7b05f02cff5254c9d096e3d1e3b cf523539933c6bd96de298e1747d7ea6d7f15b12 ad6b076da6ed4c1e6c97270543f243dc550e5c37 de5485d68c7c34e74ec4cab644e3807c53c80d80 4abd08bfbdf984eae94d372eb0b788b64e7b7664 2941f0a824b6694570b77acab4d1300e42ac9d08 8fbb7d7198ec48a43231b3086daf3561d0e1b526 76109d4f5855943d729a4d64643bf48e8405a780 ac8927f63a2847ff34a0d018b6b82a00e2575aee 76894a80ea91697dd9945f6797bd3f9175429791 d4ad5990b7a2b8279aab976e54dc8f1bde3f17a8 4e58b8ebf5579c3d7b430e2f224d77fcbe7c5917 168f13f6d2d34d5ad33e74d8cc8c5febe27b2293 2cae0af301bb015e4a81fc745a08c958abd95847 02211ccfa3190198bc44c04c9e9970f8fc33f7f0 4487a66256b49db65104a0868aa6c6c3d3fdcdec 88455612157220cc121939580fb7d473d89d0735 82fec3a4f37158052dc9d58e4b6d8c9bd01e40bb 3fd2d38c27324667039fa021dea8f3bda64dee3c fa19665718bc94f1da89d23045cfd79340593197 67fd31a59abc9292c985f161a29930bfd18e3300 ae80dad98e538170adb2bbd8c039585e07ce4000 ad6ae02435e91c5f71ce0546afbdc4395103fa38 9a9fd960ff3944bcc2f1b572d813cab8e7e0a136 e7bbcb84692260edc424b21e4c548627099096ff 58c39a5a6591c168a7bb78da6926e095176d6ff8 ba28f918d1b886d04afc041794960f0d11f797ff
+          )
+
+          fetch_chunks() {
+            local out="$1"
+            shift
+            : > "$out"
+            for sha in "$@"; do
+              gh api "/repos/${GITHUB_REPOSITORY}/git/blobs/${sha}" --jq '.content' \
+                | tr -d '\n' \
+                | base64 -d >> "$out"
+            done
+          }
+
+          fetch_chunks /tmp/light.b64 "${LIGHT_SHAS[@]}"
+          fetch_chunks /tmp/dark.b64 "${DARK_SHAS[@]}"
+          base64 -d /tmp/light.b64 > /tmp/light.webp
+          base64 -d /tmp/dark.b64 > /tmp/dark.webp
+
+          test "$(stat -c%s /tmp/light.webp)" -eq 111584
+          test "$(stat -c%s /tmp/dark.webp)" -eq 136968
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          for name in ('light', 'dark'):
+              data = Path(f'/tmp/{name}.webp').read_bytes()
+              assert data[:4] == b'RIFF' and data[8:12] == b'WEBP' and data[12:16] == b'VP8 '
+              width = int.from_bytes(data[26:28], 'little') & 0x3fff
+              height = int.from_bytes(data[28:30], 'little') & 0x3fff
+              assert (width, height) == (1672, 941), (name, width, height)
+              print(name, len(data), width, height)
+          PY
+
+      - name: Write direct theme artwork and remove fake-HD assets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('packages/skins/neon-sleeper/src/client')
+          light = Path('/tmp/light.b64').read_text().strip()
+          dark = Path('/tmp/dark.b64').read_text().strip()
+          (root / 'art-light-v5-direct.ts').write_text(
+              "export const NEON_SLEEPER_ART_LIGHT = 'data:image/webp;base64," + light + "'\n",
+              encoding='utf-8',
+          )
+          (root / 'art-dark-v5-direct.ts').write_text(
+              "export const NEON_SLEEPER_ART_DARK = 'data:image/webp;base64," + dark + "'\n",
+              encoding='utf-8',
+          )
+
+          art = root / 'art.ts'
+          text = art.read_text(encoding='utf-8')
+          text = re.sub(
+              r'/\*\* Theme-specific Neon Sleeper V5 artwork\.[^\n]*\*/',
+              '/** Neon Sleeper V5 uses two user-supplied 1672x941 originals, encoded once as WebP q85 with no resize, super-resolution, blur, or color filtering. */',
+              text,
+              count=1,
+          )
+          art.write_text(text, encoding='utf-8')
+
+          css = root / 'neon-sleeper.module.css'
+          css_text = css.read_text(encoding='utf-8')
+          css_text = re.sub(
+              r"\nbody\[data-dsh-neon-sleeper\]\[data-ds-dark-theme\]::before \{\n\s*filter:[^}]+\}\n",
+              '\n',
+              css_text,
+          )
+          css.write_text(css_text, encoding='utf-8')
+
+          test = Path('packages/skins/neon-sleeper/tests/v5-art.spec.ts')
+          test_text = test.read_text(encoding='utf-8').replace('toBeGreaterThan(200_000)', 'toBeGreaterThan(90_000)')
+          test.write_text(test_text, encoding='utf-8')
+          PY
+
+          rm -f packages/skins/neon-sleeper/src/client/art-wide-v5-part*.ts
+          rm -f packages/skins/neon-sleeper/src/client/art-portrait-part*.ts
+
+      - name: Update V5 documentation and metadata
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re
+
+          for filename in ('README.md', 'README.zh.md'):
+              path = Path('packages/skins/neon-sleeper') / filename
+              text = path.read_text(encoding='utf-8')
+              if filename == 'README.md':
+                  text = re.sub(
+                      r'V5 makes image fidelity a functional requirement\..*?\n\n- .*?Responsive portrait artwork remains embedded in the package with no runtime image request\.',
+                      'V5 makes image fidelity a functional requirement. Light and dark mode now use two separate user-supplied 1672×941 originals. Each image is encoded once as WebP q85 at its native dimensions; there is no resize, EDSR/super-resolution, blur, theme recoloring, or full-screen veil.\n\n- Separate 1672×941 light and dark originals supplied by the user.\n- Single-pass WebP q85 encoding at native resolution; no fake-HD upscaling.\n- No global blur, shell-level backdrop blur, full-screen milky scrim, or background color filter.\n- Light sidebar uses a luminous blue-white translucent surface with clearer grouping.\n- Dark sidebar uses a restrained deep-blue translucent surface with strong text contrast.\n- Transparent composer layout wrappers so only the real input surface is visible.',
+                      text,
+                      flags=re.S,
+                  )
+                  text = text.replace('The wide artwork must remain at least 3000×1900,', 'Both theme artworks must remain exactly 1672×941,')
+              else:
+                  text = re.sub(
+                      r'V5 将图片清晰度直接视为功能要求。.*?\n\n- .*?运行时不请求外部图片。',
+                      'V5 将图片清晰度直接视为功能要求。亮色和暗色模式现在分别使用用户提供的两张 1672×941 原始图片；每张图片只在原始尺寸下进行一次 WebP q85 编码，不缩放、不做 EDSR/超分辨率、不模糊、不对暗色图二次调色，也不叠整屏雾状蒙版。\n\n- 亮色与暗色分别使用用户提供的 1672×941 原图。\n- 原始尺寸单次 WebP q85 编码，不做伪高清放大。\n- 不使用全局 blur、shell 级 backdrop blur、整屏乳白蒙版或背景颜色滤镜。\n- 亮色侧边栏采用清透的蓝白半透明表面，分组和选中状态更清晰。\n- 暗色侧边栏采用克制的深蓝半透明表面，并保持高对比文字。\n- composer 布局外层保持透明，只显示真正的输入组件表面。',
+                      text,
+                      flags=re.S,
+                  )
+                  text = text.replace('宽屏背景必须保持至少 3000×1900；', '亮暗两张主题背景必须保持 1672×941 原始尺寸；')
+              path.write_text(text, encoding='utf-8')
+
+          package_path = Path('packages/skins/neon-sleeper/package.json')
+          package = json.loads(package_path.read_text(encoding='utf-8'))
+          package['description'] = 'Photography-first Neon Sleeper skin with separate user-supplied 1672x941 light and dark originals, no fake-HD upscaling, blur or full-screen veil'
+          package_path.write_text(json.dumps(package, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          skin_path = Path('packages/skins/neon-sleeper/skin.json')
+          skin = json.loads(skin_path.read_text(encoding='utf-8'))
+          skin['description'] = '《夜航舱》V5：亮色与暗色分别直接使用用户提供的 1672×941 原图，在原始尺寸下单次 WebP q85 编码；不再使用低清图超分放大，不做背景模糊、暗色二次滤镜或整屏雾化蒙版。侧边栏保持清透蓝白/深蓝双主题，composer 外层保持透明。'
+          skin_path.write_text(json.dumps(skin, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Refresh bilingual documentation record
+        run: node scripts/verify-docs.mjs --write packages/skins/neon-sleeper
+      - name: Build and test Neon Sleeper
+        run: |
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper build
+          pnpm --filter @linxin666/dsh-client-ui-skin-neon-sleeper test
+      - name: Generate repository assets
+        run: |
+          node scripts/skin-center-bundles
+          pnpm --filter @linxin666/dsh-client-ui-skin-center build
+          node scripts/gallery-build
+          pnpm --filter @linxin666/dsh-skins build
+      - name: Install Chromium
+        run: pnpm dlx playwright@1.62.1 install --with-deps chromium
+      - name: Capture direct-original previews
+        run: node scripts/capture-previews neon-sleeper --serve
+      - name: Validate generated state
+        run: |
+          pnpm gallery:check
+          pnpm skin-center:check
+          pnpm community:check
+          pnpm aggregate:check
+          pnpm docs:check
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-sleeper-v5-direct-original-previews
+          path: packages/skins/neon-sleeper/preview
+      - name: Commit final direct-original state
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm -f .github/workflows/neon-sleeper-v5-direct-finalize.yml
+          git add -A
+          git commit -m 'fix(skins): use direct Neon Sleeper light and dark originals'
+          git push origin HEAD:feat/neon-sleeper-v5-hd
